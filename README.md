@@ -61,7 +61,9 @@ Chrome only loads extensions from the Web Store *or* from a folder on your compu
 
 ## Development
 
-The extension uses Manifest V3 and plain HTML, CSS, and JavaScript. It has no runtime dependencies or build step.
+The extension uses Manifest V3 and plain HTML, CSS, and JavaScript. It has no runtime dependencies.
+
+Building requires macOS, Linux, or WSL — the scripts are Bash and use `zip`/`unzip`, which Git Bash on Windows does not ship. Installing a release ZIP works on Windows; building one does not.
 
 ```sh
 cd youtube-structure-collector
