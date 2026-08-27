@@ -39,3 +39,26 @@ test("checks quiz answers leniently", () => {
   assert.equal(YSC.checkAnswer("  I was supposed to call you last night!  ", original), true);
   assert.equal(YSC.checkAnswer("I was supposed to text you last night.", original), false);
 });
+
+test("extracts the hidden word(s) for a single blank", () => {
+  const original = "I was supposed to call you last night.";
+  const pattern = "I was supposed to [____] you last night.";
+  assert.deepEqual(YSC.extractBlanks(original, pattern), ["call"]);
+});
+
+test("extracts one merged blank for adjacent selected words", () => {
+  const original = "Yeah, I'll take that.";
+  const pattern = "Yeah, I'll [____].";
+  assert.deepEqual(YSC.extractBlanks(original, pattern), ["take that"]);
+});
+
+test("extracts multiple separate blanks in order", () => {
+  const original = "Can we leave before it starts raining?";
+  const pattern = "Can we [____] before it starts [____]?";
+  assert.deepEqual(YSC.extractBlanks(original, pattern), ["leave", "raining"]);
+});
+
+test("returns an empty list when the pattern has no blanks", () => {
+  const original = "Can we leave?";
+  assert.deepEqual(YSC.extractBlanks(original, original), []);
+});

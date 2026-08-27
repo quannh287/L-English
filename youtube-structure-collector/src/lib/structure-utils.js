@@ -82,6 +82,19 @@
     return normalizeForCompare(answer) === normalizeForCompare(original);
   }
 
+  function extractBlanks(original, pattern) {
+    const segments = pattern.split(PLACEHOLDER);
+    const blanks = [];
+    let cursor = 0;
+    for (let i = 0; i < segments.length; i++) {
+      const index = original.indexOf(segments[i], cursor);
+      if (index === -1) return null;
+      if (i > 0) blanks.push(original.slice(cursor, index));
+      cursor = index + segments[i].length;
+    }
+    return blanks;
+  }
+
   const api = {
     PLACEHOLDER,
     tokenize,
@@ -93,7 +106,8 @@
     formatMarkdown,
     formatText,
     getVideoId,
-    checkAnswer
+    checkAnswer,
+    extractBlanks
   };
 
   root.YSC = api;

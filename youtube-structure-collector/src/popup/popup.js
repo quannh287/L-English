@@ -107,12 +107,18 @@
     quizAnswerInput.focus();
   }
 
+  function expectedAnswer(item) {
+    const blanks = YSC.extractBlanks(item.original, item.pattern);
+    return blanks && blanks.length ? blanks.join(" ") : item.original;
+  }
+
   function checkQuizAnswer() {
     if (quizAnswered || quizIndex >= quizItems.length) return;
     const item = quizItems[quizIndex];
-    const correct = YSC.checkAnswer(quizAnswerInput.value, item.original);
+    const answer = expectedAnswer(item);
+    const correct = YSC.checkAnswer(quizAnswerInput.value, answer);
     if (correct) quizScore += 1;
-    quizFeedback.textContent = correct ? "Correct!" : `Not quite. Answer: ${item.original}`;
+    quizFeedback.textContent = correct ? "Correct!" : `Not quite. Answer: ${answer}`;
     quizAnswered = true;
     quizAnswerInput.disabled = true;
     quizCheckButton.hidden = true;
