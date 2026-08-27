@@ -15,6 +15,7 @@
         <div class="view-actions">
           <button id="practice" type="button">Practice</button>
           <button id="show-library" type="button">All videos</button>
+          <button id="show-words" type="button">New words</button>
         </div>
         <input id="search" type="search" placeholder="Search structures" aria-label="Search structures for this video">
         <div id="structures"></div>
@@ -35,6 +36,21 @@
           <button id="library-copy" type="button">Copy Markdown</button>
           <button id="library-download-md" type="button">Download MD</button>
           <button id="library-download-txt" type="button">Download TXT</button>
+        </div>
+      </section>
+      <section id="words" hidden>
+        <div class="view-actions">
+          <button id="words-back" type="button">Back to this video</button>
+        </div>
+        <form id="word-form">
+          <input id="word-input" placeholder="New word" aria-label="New word" required>
+          <input id="meaning-input" placeholder="Meaning / note" aria-label="Meaning or note">
+          <button type="submit">Add</button>
+        </form>
+        <div id="word-list"></div>
+        <div class="export-actions">
+          <button id="words-copy" type="button">Copy Markdown</button>
+          <button id="words-download-md" type="button">Download MD</button>
         </div>
       </section>
       <section id="quiz" hidden>

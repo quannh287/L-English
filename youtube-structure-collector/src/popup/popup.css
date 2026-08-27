@@ -101,3 +101,28 @@ button:hover, button:focus-visible { background: #e2e5e7; }
 .note-text { color: #5f6368; margin: 0 0 10px; }
 
 .timestamp { color: #065fd4; font-variant-numeric: tabular-nums; text-decoration: none; }
+
+#word-form { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+
+#word-form input {
+  border: 1px solid #bbb;
+  border-radius: 5px;
+  flex: 1 1 100%;
+  font: inherit;
+  min-width: 0;
+  padding: 7px;
+}
+
+#word-form button { flex: 1 1 100%; }
+
+.word-item {
+  align-items: baseline;
+  border-top: 1px solid #ddd;
+  display: flex;
+  gap: 6px;
+  padding: 8px 0;
+}
+
+.word-item .word { font-weight: 600; }
+.word-item .meaning { color: #5f6368; flex: 1; }
+.word-item .word-remove { color: #b3261e; line-height: 1; padding: 2px 6px; }

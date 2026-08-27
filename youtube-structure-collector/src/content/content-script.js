@@ -5,6 +5,7 @@
   const TEXT_SELECTOR = "yt-formatted-string.segment-text";
   const CAPTION_SELECTOR = ".ytp-caption-segment";
   let editor;
+  let onSelectionChange;
 
   function videoTitle() {
     return (
@@ -46,8 +47,21 @@
     return true;
   }
 
+  async function saveWord(word) {
+    if (!chrome.storage) {
+      throw new Error("Extension was reloaded. Refresh this page and try again.");
+    }
+    const { words = [] } = await chrome.storage.local.get("words");
+    if (words.some((entry) => entry.word.toLowerCase() === word.toLowerCase())) return false;
+    words.push({ id: crypto.randomUUID(), word, meaning: "", createdAt: new Date().toISOString() });
+    await chrome.storage.local.set({ words });
+    return true;
+  }
+
   function closeEditor() {
     document.removeEventListener("pointerdown", onOutsidePointerDown, true);
+    if (onSelectionChange) document.removeEventListener("selectionchange", onSelectionChange);
+    onSelectionChange = null;
     editor?.remove();
     editor = null;
   }
@@ -82,11 +96,13 @@
     editor.setAttribute("aria-label", "Create a fill-in-the-blank pattern");
 
     const heading = document.createElement("h2");
-    heading.textContent = "Select words to hide";
+    heading.textContent = "Select words, then choose an action";
     const sentence = document.createElement("p");
-    sentence.className = "ysc-original";
-    const tokenArea = document.createElement("div");
-    tokenArea.className = "ysc-tokens";
+    sentence.className = "ysc-sentence";
+    const preview = document.createElement("p");
+    preview.className = "ysc-preview";
+    const tools = document.createElement("div");
+    tools.className = "ysc-tools";
     const status = document.createElement("p");
     status.className = "ysc-status";
     status.setAttribute("aria-live", "polite");
@@ -97,47 +113,78 @@
       YSC.normalizeText(kept().map((token) => (token.selected ? YSC.PLACEHOLDER : token.text)).join(""))
         .replace(/\[____\](?:\s+\[____\])+/g, YSC.PLACEHOLDER);
 
-    function render() {
-      sentence.textContent = currentOriginal();
-      tokenArea.textContent = "";
-      tokens.forEach((token) => {
+    // ponytail: native text selection instead of per-word buttons — double-click = one word, drag = a phrase
+    function highlighted() {
+      const selection = document.getSelection();
+      if (!selection || selection.isCollapsed) return [];
+      return Array.from(sentence.querySelectorAll(".ysc-token"))
+        .filter((span) => selection.containsNode(span, true))
+        .map((span) => tokens[Number(span.dataset.index)]);
+    }
+
+    function renderSentence() {
+      sentence.textContent = "";
+      tokens.forEach((token, index) => {
         if (token.removed) return;
         if (!YSC.isWord(token.text)) {
-          tokenArea.append(document.createTextNode(token.text));
+          sentence.append(document.createTextNode(token.text));
           return;
         }
-        const item = document.createElement("span");
-        item.className = "ysc-item";
-
-        const word = document.createElement("button");
-        word.type = "button";
-        word.className = "ysc-word";
-        word.textContent = token.text;
-        word.setAttribute("aria-pressed", String(token.selected));
-        word.classList.toggle("is-selected", token.selected);
-        word.addEventListener("click", () => {
-          token.selected = !token.selected;
-          word.classList.toggle("is-selected", token.selected);
-          word.setAttribute("aria-pressed", String(token.selected));
-          status.textContent = "";
-        });
-
-        const remove = document.createElement("button");
-        remove.type = "button";
-        remove.className = "ysc-remove";
-        remove.textContent = "\u00d7";
-        remove.setAttribute("aria-label", `Remove ${token.text}`);
-        remove.addEventListener("click", () => {
-          token.removed = true;
-          status.textContent = "";
-          render();
-        });
-
-        item.append(word, remove);
-        tokenArea.append(item);
+        const span = document.createElement("span");
+        span.className = "ysc-token";
+        span.classList.toggle("is-hidden", token.selected);
+        span.dataset.index = String(index);
+        span.textContent = token.text;
+        sentence.append(span);
       });
+      const hasBlank = kept().some((token) => token.selected);
+      preview.textContent = hasBlank ? currentPattern() : "";
+      preview.hidden = !hasBlank;
+      syncTools();
     }
-    render();
+
+    function action(label, title, handler) {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.textContent = label;
+      button.title = title;
+      // keep the text selection alive when the button takes focus
+      button.addEventListener("mousedown", (event) => event.preventDefault());
+      button.addEventListener("click", () => handler(highlighted()));
+      tools.append(button);
+      return button;
+    }
+
+    const hideButton = action("Hide", "Turn the selected word(s) into a blank", (picked) => {
+      const hiding = picked.some((token) => !token.selected);
+      picked.forEach((token) => { token.selected = hiding; });
+      status.textContent = "";
+      renderSentence();
+    });
+    const wordButton = action("Save word", "Save the selection to your new words list", async (picked) => {
+      const phrase = picked.map((token) => token.text).join(" ");
+      if (!phrase) return;
+      try {
+        const added = await saveWord(phrase);
+        status.textContent = added ? `Added "${phrase}" to new words.` : `"${phrase}" is already in new words.`;
+      } catch (error) {
+        status.textContent = error.message;
+      }
+    });
+    const removeButton = action("Remove", "Drop the selected word(s) from this sentence", (picked) => {
+      picked.forEach((token) => { token.removed = true; });
+      status.textContent = "";
+      renderSentence();
+    });
+
+    function syncTools() {
+      const picked = highlighted();
+      [hideButton, wordButton, removeButton].forEach((button) => { button.disabled = !picked.length; });
+      hideButton.textContent = picked.length && picked.every((token) => token.selected) ? "Unhide" : "Hide";
+    }
+    onSelectionChange = syncTools;
+    document.addEventListener("selectionchange", onSelectionChange);
+    renderSentence();
 
     const actions = document.createElement("div");
     actions.className = "ysc-actions";
@@ -154,7 +201,7 @@
     save.textContent = "Save structure";
     save.addEventListener("click", async () => {
       if (!tokens.some((token) => token.selected && !token.removed)) {
-        status.textContent = "Select at least one word.";
+        status.textContent = "Select a word and press Hide first.";
         return;
       }
       save.disabled = true;
@@ -169,10 +216,9 @@
       }
     });
     actions.append(cancel, save);
-    editor.append(heading, sentence, tokenArea, status, actions);
+    editor.append(heading, sentence, tools, preview, status, actions);
     document.body.append(editor);
     document.addEventListener("pointerdown", onOutsidePointerDown, true);
-    editor.querySelector(".ysc-word")?.focus();
   }
 
   function enhanceTranscript(root = document) {
