@@ -15,6 +15,9 @@
   }
 
   async function saveStructure(original, pattern) {
+    if (!chrome.storage) {
+      throw new Error("Extension was reloaded. Refresh this page and try again.");
+    }
     const videoId = YSC.getVideoId(location.href);
     if (!videoId) throw new Error("No YouTube video ID found.");
 
