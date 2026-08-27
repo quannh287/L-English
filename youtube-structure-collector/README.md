@@ -32,7 +32,7 @@ youtube-structure-collector/
 └── tests/          # Node built-in tests
 ```
 
-Chrome loads source files directly from `src/`. The build command packages those runtime files without transpiling, bundling, or minifying them.
+For local development, Chrome loads the multi-file source in `src/` directly — no build step needed, edits show up on reload. `npm run build` only bundles for the release ZIP: it concatenates and minifies (via the `esbuild` devDependency) each execution context's files down to one `<script>` and one stylesheet (the content script and the popup are separate Manifest V3 JS runtimes, so they can't share a single bundle) and rewrites `manifest.json`/`popup.html` to point at the bundled files. The extension itself still ships with zero runtime dependencies — esbuild only runs at build time.
 
 ## Test
 
