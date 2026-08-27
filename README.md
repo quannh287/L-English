@@ -8,13 +8,17 @@ A lightweight Chrome extension for turning visible YouTube transcript sentences 
 
 ## Features
 
-- Capture a sentence from an on-video subtitle or the YouTube transcript.
-- Select words to replace with `[____]`.
-- Keep structures grouped by video.
-- Edit or delete saved patterns.
-- Copy a collection as Markdown.
-- Download collections as Markdown or plain text.
-- Store everything locally in the current Chrome profile.
+- **Capture a sentence** from an on-video subtitle (click it) or from the YouTube transcript panel (**+ Structure**).
+- **Hide words** you pick — each selection becomes `[____]`; adjacent words merge into one blank.
+- **Timestamps** — every structure remembers the second it appears at and links back to that exact moment in the video.
+- **Usage examples** — add your own notes on where and how you'd use a structure (Enter to add, `×` to remove); as many per structure as you like.
+- **Practice mode** — fill-in-the-blank quiz with lenient answer checking (case, punctuation, extra spaces) and a score.
+- **Spaced repetition** — practice drills only what's due (0/1/3/7/14/30 days); due items are badged in the list.
+- **Grouped by video**, with a search box for the current video and an **All videos** library view that searches everything.
+- **Edit or delete** any saved pattern, or clear a whole video.
+- **Export** a video or your whole library as Markdown (copy or download) or plain text — timestamps and examples included.
+- **Works off YouTube** — opening the popup elsewhere shows your most recently updated video.
+- **Local only** — everything lives in `chrome.storage.local` on the current Chrome profile.
 
 ## Install
 
@@ -46,7 +50,9 @@ Chrome only loads extensions from the Web Store *or* from a folder on your compu
 2. Click a subtitle over the video, or select **+ Structure** beside a transcript sentence.
 3. Select one or more words to hide.
 4. Select **Save structure**.
-5. Open the extension popup to review, edit, copy, or download your collection.
+5. Open the extension popup to review, edit, practice, or export your collection.
+6. In the popup, use the timestamp link to jump back to the line, and the input under a structure to add usage examples (Enter to add).
+7. Select **Practice** to quiz yourself on the structures that are due.
 
 ## Development
 

@@ -14,7 +14,9 @@ A dependency-free Chrome extension that turns visible YouTube transcript sentenc
 1. Open a YouTube video with subtitles or an available transcript.
 2. Click a subtitle over the video, or select **+ Structure** beside a transcript sentence.
 3. Select one or more words to replace with `[____]`, then save.
-4. Open the extension popup to edit, delete, copy, or download the structures for the current video.
+4. Open the extension popup to edit, delete, practice, or export the structures for the current video.
+
+In the popup, each structure shows a timestamp link back to that second of the video, an input for your own usage examples (Enter to add, `×` to remove), and a **Due** badge when it's up for review. **Practice** runs a fill-in-the-blank quiz over the due structures on a 0/1/3/7/14/30-day schedule; **All videos** searches and exports your whole library. Exports (Markdown or plain text) include timestamps and examples.
 
 Saved structures remain on this Chrome profile through `chrome.storage.local`.
 
