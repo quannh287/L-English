@@ -49,5 +49,5 @@ jobs:
         if: steps.release-pr.outputs.prs_created == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
-          PR_NUMBER: ${{ fromJSON(steps.release-pr.outputs.pr).number }}
+          PR_NUMBER: ${{ fromJSON(steps.release-pr.outputs.prs)[0].number }}
         run: gh pr edit "$PR_NUMBER" --add-reviewer "$GITHUB_REPOSITORY_OWNER"
