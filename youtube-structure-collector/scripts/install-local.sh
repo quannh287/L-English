@@ -4,10 +4,7 @@
 set -euo pipefail
 
 PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-case "$(uname -s)" in
-  Darwin) DEST="$HOME/Library/Application Support/youtube-structure-collector" ;;
-  *)      DEST="${XDG_DATA_HOME:-$HOME/.local/share}/youtube-structure-collector" ;;
-esac
+DEST="$HOME/Documents/youtube-structure-collector"
 
 ARCHIVE="${1:-}"
 if [ -z "$ARCHIVE" ]; then
