@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.1.0](https://github.com/quannh287/L-English/compare/v2.0.0...v2.1.0) (2026-08-27)
+
+
+### Features
+
+* **scripts:** install a released version, and swap the folder atomically ([4353586](https://github.com/quannh287/L-English/commit/435358672e05265426f3a7429f8206282589e545))
+
+
+### Bug Fixes
+
+* **scripts:** install to ~/Documents instead of Application Support ([b6d6366](https://github.com/quannh287/L-English/commit/b6d6366cf50f8bc04ef817be79aee6e10e391be3))
+
 ## [2.0.0](https://github.com/quannh287/L-English/compare/v1.1.0...v2.0.0) (2026-08-27)
 
 
