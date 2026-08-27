@@ -2,6 +2,32 @@
   "use strict";
 
   const PLACEHOLDER = "[____]";
+  const DICTIONARY_URL = "https://api.dictionaryapi.dev/api/v2/entries/en/";
+  const REQUEST_TIMEOUT_MS = 8000;
+
+  // Every network call goes through here: one place for the timeout and the non-OK/error contract (null).
+  const requestJson = async (url) => {
+    try {
+      const response = await fetch(url, { signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS) });
+      return response.ok ? await response.json() : null;
+    } catch {
+      return null;
+    }
+  };
+
+  // Wiktionary-backed, English-English, no key. Returns null when the word is unknown or the call fails.
+  async function lookupWord(word) {
+    const term = normalizeText(word).toLowerCase();
+    if (!term) return null;
+    const [entry] = (await requestJson(DICTIONARY_URL + encodeURIComponent(term))) || [];
+    const sense = entry?.meanings?.[0];
+    const definition = sense?.definitions?.find((item) => item.definition)?.definition;
+    if (!definition) return null;
+    return {
+      ipa: entry.phonetic || entry.phonetics?.find((item) => item.text)?.text || "",
+      meaning: sense.partOfSpeech ? `(${sense.partOfSpeech}) ${definition}` : definition
+    };
+  }
 
   function tokenize(text) {
     return text.match(/[\p{L}\p{N}'’]+|[^\p{L}\p{N}'’]+/gu) || [];
@@ -105,7 +131,10 @@
 
   function formatWordsMarkdown(words) {
     const lines = ["# Vocabulary", ""];
-    words.forEach((item) => lines.push(item.meaning ? `- **${item.word}** — ${item.meaning}` : `- **${item.word}**`));
+    words.forEach((item) => {
+      const head = item.ipa ? `- **${item.word}** ${item.ipa}` : `- **${item.word}**`;
+      lines.push(item.meaning ? `${head} — ${item.meaning}` : head);
+    });
     return lines.join("\n").trimEnd() + "\n";
   }
 
@@ -175,6 +204,8 @@
     formatMarkdown,
     formatText,
     formatWordsMarkdown,
+    lookupWord,
+    requestJson,
     getVideoId,
     checkAnswer,
     extractBlanks,

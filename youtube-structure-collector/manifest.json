@@ -7,6 +7,9 @@
     "storage",
     "activeTab"
   ],
+  "host_permissions": [
+    "https://api.dictionaryapi.dev/*"
+  ],
   "icons": {
     "16": "assets/icons/icon-16.png",
     "32": "assets/icons/icon-32.png",

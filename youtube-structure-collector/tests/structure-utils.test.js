@@ -176,3 +176,25 @@ test("formatWordsMarkdown lists words with optional meanings", () => {
   ]);
   assert.equal(markdown, "# Vocabulary\n\n- **linger** — nán lại\n- **blunt**\n");
 });
+
+test("lookupWord returns IPA and an English definition", async () => {
+  const original = globalThis.fetch;
+  globalThis.fetch = async () => ({
+    ok: true,
+    json: async () => [{
+      word: "relentless",
+      phonetics: [{ text: "/ɹɪˈlɛntləs/" }],
+      meanings: [{ partOfSpeech: "adjective", definitions: [{ definition: "Unrelenting in severity." }] }]
+    }]
+  });
+  try {
+    assert.deepEqual(await YSC.lookupWord(" Relentless "), {
+      ipa: "/ɹɪˈlɛntləs/",
+      meaning: "(adjective) Unrelenting in severity."
+    });
+    globalThis.fetch = async () => ({ ok: false });
+    assert.equal(await YSC.lookupWord("zzzqqq"), null);
+  } finally {
+    globalThis.fetch = original;
+  }
+});
