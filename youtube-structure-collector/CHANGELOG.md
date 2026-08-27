@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.5.0](https://github.com/quannh287/L-English/compare/v0.4.0...v0.5.0) (2026-08-27)
+
+
+### Features
+
+* **popup:** add all-videos library view, search, and spaced repetition ([aac7e20](https://github.com/quannh287/L-English/commit/aac7e2033f4ba2dc60286511822bc9f7e0a8110e))
+* **popup:** quiz only the missing word(s), not the whole sentence ([1803e8f](https://github.com/quannh287/L-English/commit/1803e8f1ab2b7f8f1f1d93387c514b62fe961ff9))
+
+
+### Bug Fixes
+
+* **assets:** regenerate app icon in minimal light-green style ([f60deef](https://github.com/quannh287/L-English/commit/f60deef182b6172f43d1b6d1c3f6fe3209f0255e))
+* **popup:** don't block viewing saved structures off YouTube ([ecbc128](https://github.com/quannh287/L-English/commit/ecbc128b7447b7eb0b61393054042bd281d634f7))
+
 ## [0.4.0](https://github.com/quannh287/L-English/compare/v0.3.2...v0.4.0) (2026-08-27)
 
 
