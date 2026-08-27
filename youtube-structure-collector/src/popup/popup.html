@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>YouTube Structure Collector</title>
+    <link rel="stylesheet" href="popup.css">
+  </head>
+  <body>
+    <main>
+      <h1>YouTube Structure Collector</h1>
+      <p id="status" role="status">Loading…</p>
+      <section id="collection" hidden>
+        <a id="video-title" target="_blank" rel="noreferrer"></a>
+        <div id="structures"></div>
+        <div class="export-actions">
+          <button id="copy" type="button">Copy Markdown</button>
+          <button id="download-md" type="button">Download MD</button>
+          <button id="download-txt" type="button">Download TXT</button>
+        </div>
+        <button id="clear" class="danger" type="button">Clear this video</button>
+      </section>
+    </main>
+    <script src="../lib/structure-utils.js"></script>
+    <script src="popup.js"></script>
+  </body>
+</html>

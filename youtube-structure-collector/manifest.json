@@ -1,0 +1,28 @@
+{
+  "manifest_version": 3,
+  "name": "YouTube Structure Collector",
+  "version": "0.1.0",
+  "description": "Turn YouTube transcript sentences into reusable fill-in-the-blank patterns.",
+  "permissions": ["storage", "activeTab"],
+  "icons": {
+    "16": "assets/icons/icon-16.png",
+    "32": "assets/icons/icon-32.png",
+    "48": "assets/icons/icon-48.png",
+    "128": "assets/icons/icon-128.png"
+  },
+  "action": {
+    "default_title": "YouTube Structure Collector",
+    "default_popup": "src/popup/popup.html",
+    "default_icon": {
+      "16": "assets/icons/icon-16.png",
+      "32": "assets/icons/icon-32.png"
+    }
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://www.youtube.com/watch*"],
+      "js": ["src/lib/structure-utils.js", "src/content/content-script.js"],
+      "css": ["src/content/content.css"]
+    }
+  ]
+}
