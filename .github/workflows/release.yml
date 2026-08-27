@@ -20,6 +20,8 @@ jobs:
     steps:
       - uses: googleapis/release-please-action@v4
         id: release
+        with:
+          skip-github-pull-request: true
 
   publish-extension:
     needs: release
@@ -29,3 +31,15 @@ jobs:
       tag_name: ${{ needs.release.outputs.tag_name }}
       commit_sha: ${{ needs.release.outputs.release_sha }}
     secrets: inherit
+
+  prepare-next-release:
+    needs: [release, publish-extension]
+    if: >-
+      always() &&
+      needs.release.result == 'success' &&
+      (needs.publish-extension.result == 'success' || needs.publish-extension.result == 'skipped')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: googleapis/release-please-action@v4
+        with:
+          skip-github-release: true

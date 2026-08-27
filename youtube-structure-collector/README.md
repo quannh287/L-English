@@ -54,6 +54,8 @@ Use Conventional Commits on `main`. Release Please maintains a release pull requ
 
 Merging the release pull request updates `package.json`, `package-lock.json`, and `manifest.json`. Release Please then creates a draft GitHub Release and passes its tag name and exact release commit to the extension publishing workflow. The publishing workflow checks out that immutable commit, validates and builds the extension, attaches the installable ZIP, and publishes the release and tag.
 
+Only after publication does Release Please prepare the next release pull request. This prevents draft releases from causing previously released commits to be collected again.
+
 The **Publish Extension** workflow can also be run manually with an existing release tag to rebuild or replace its ZIP.
 
 ## v1 limits
