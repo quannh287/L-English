@@ -79,7 +79,16 @@ One exception: pressing **Look up** on a saved word sends that single word to `a
 
 ## License
 
-[MIT](LICENSE) — clone, fork, modify, and redistribute freely; just keep the copyright notice.
+[GNU GPL v3](LICENSE) or later. Clone, fork, and modify freely — but if you distribute a modified version, it has to ship its source under the same license.
+
+    YouTube Structure Collector — turn YouTube subtitles into fill-in-the-blank patterns.
+    Copyright (C) 2026 quannh287
+
+    This program is free software: you can redistribute it and/or modify it under
+    the terms of the GNU General Public License as published by the Free Software
+    Foundation, either version 3 of the License, or (at your option) any later
+    version. It is distributed WITHOUT ANY WARRANTY; see the LICENSE file for
+    details.
 
 ## Current limitations
 
