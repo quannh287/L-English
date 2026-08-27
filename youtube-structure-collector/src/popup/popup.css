@@ -325,7 +325,25 @@ button.primary:hover:not(:disabled) { background: var(--primary-container); }
 .note-text { color: var(--on-surface-variant); font-size: 12px; line-height: 16px; margin: 0; }
 
 /* words */
-#word-form { display: grid; gap: 12px; }
+#add-entry { padding: 0; }
+
+#add-entry summary {
+  align-items: center;
+  cursor: pointer;
+  display: flex;
+  gap: 8px;
+  list-style: none;
+  padding: 12px;
+}
+
+#add-entry summary::-webkit-details-marker { display: none; }
+#add-entry summary:hover { background: var(--c-low); }
+#add-entry summary h2 { flex: 1; font: 700 16px/24px var(--sans); letter-spacing: -0.01em; margin: 0; }
+#add-entry summary .lead { color: var(--primary); }
+#add-entry summary .chevron { color: var(--on-surface-variant); transition: transform 150ms ease; }
+#add-entry[open] summary .chevron { transform: rotate(180deg); }
+#add-entry[open] summary { border-bottom: 1px solid var(--outline-variant); }
+#word-form { display: grid; gap: 12px; padding: 12px; }
 #word-form input:last-of-type { font: 450 13px/20px var(--mono); }
 
 .word-item {
@@ -349,7 +367,14 @@ button.primary:hover:not(:disabled) { background: var(--primary-container); }
   padding: 8px;
 }
 
-.word-item .meaning:empty { display: none; }
+.word-item .meaning:empty::before { color: var(--outline); content: "Double-click to add a meaning…"; }
+
+.is-editing {
+  background: var(--c-lowest);
+  border-radius: var(--r);
+  cursor: text;
+  outline: 2px solid var(--primary);
+}
 .list-head { align-items: center; display: flex; gap: 8px; }
 .list-head .label { flex: 1; }
 
