@@ -49,8 +49,39 @@
   margin: 0 0 12px;
 }
 
+.ysc-original {
+  color: #606060;
+  margin: 0 0 12px;
+}
+
 .ysc-tokens {
-  line-height: 2.35;
+  line-height: 2.6;
+}
+
+.ysc-item {
+  display: inline-block;
+  position: relative;
+}
+
+.ysc-remove {
+  background: #0f0f0f;
+  border: 0;
+  border-radius: 50%;
+  color: #fff;
+  cursor: pointer;
+  display: none;
+  font: 12px/16px Arial, sans-serif;
+  height: 16px;
+  padding: 0;
+  position: absolute;
+  right: -6px;
+  top: -8px;
+  width: 16px;
+}
+
+.ysc-item:hover .ysc-remove,
+.ysc-remove:focus-visible {
+  display: block;
 }
 
 .ysc-word {

@@ -47,8 +47,16 @@
   }
 
   function closeEditor() {
+    document.removeEventListener("pointerdown", onOutsidePointerDown, true);
     editor?.remove();
     editor = null;
+  }
+
+  function onOutsidePointerDown(event) {
+    if (editor && !editor.contains(event.target)) {
+      playVideo();
+      closeEditor();
+    }
   }
 
   function currentTime() {
@@ -66,8 +74,7 @@
 
   function openEditor(original, startSeconds) {
     closeEditor();
-    const selected = new Set();
-    const tokens = YSC.tokenize(original);
+    const tokens = YSC.tokenize(original).map((text) => ({ text, selected: false }));
 
     editor = document.createElement("section");
     editor.className = "ysc-editor";
@@ -76,29 +83,61 @@
 
     const heading = document.createElement("h2");
     heading.textContent = "Select words to hide";
+    const sentence = document.createElement("p");
+    sentence.className = "ysc-original";
     const tokenArea = document.createElement("div");
     tokenArea.className = "ysc-tokens";
     const status = document.createElement("p");
     status.className = "ysc-status";
     status.setAttribute("aria-live", "polite");
 
-    tokens.forEach((token, index) => {
-      if (!YSC.isWord(token)) {
-        tokenArea.append(document.createTextNode(token));
-        return;
-      }
-      const word = document.createElement("button");
-      word.type = "button";
-      word.className = "ysc-word";
-      word.textContent = token;
-      word.addEventListener("click", () => {
-        selected.has(index) ? selected.delete(index) : selected.add(index);
-        word.classList.toggle("is-selected", selected.has(index));
-        word.setAttribute("aria-pressed", String(selected.has(index)));
-        status.textContent = "";
+    const kept = () => tokens.filter((token) => !token.removed);
+    const currentOriginal = () => YSC.normalizeText(kept().map((token) => token.text).join(""));
+    const currentPattern = () =>
+      YSC.normalizeText(kept().map((token) => (token.selected ? YSC.PLACEHOLDER : token.text)).join(""))
+        .replace(/\[____\](?:\s+\[____\])+/g, YSC.PLACEHOLDER);
+
+    function render() {
+      sentence.textContent = currentOriginal();
+      tokenArea.textContent = "";
+      tokens.forEach((token) => {
+        if (token.removed) return;
+        if (!YSC.isWord(token.text)) {
+          tokenArea.append(document.createTextNode(token.text));
+          return;
+        }
+        const item = document.createElement("span");
+        item.className = "ysc-item";
+
+        const word = document.createElement("button");
+        word.type = "button";
+        word.className = "ysc-word";
+        word.textContent = token.text;
+        word.setAttribute("aria-pressed", String(token.selected));
+        word.classList.toggle("is-selected", token.selected);
+        word.addEventListener("click", () => {
+          token.selected = !token.selected;
+          word.classList.toggle("is-selected", token.selected);
+          word.setAttribute("aria-pressed", String(token.selected));
+          status.textContent = "";
+        });
+
+        const remove = document.createElement("button");
+        remove.type = "button";
+        remove.className = "ysc-remove";
+        remove.textContent = "\u00d7";
+        remove.setAttribute("aria-label", `Remove ${token.text}`);
+        remove.addEventListener("click", () => {
+          token.removed = true;
+          status.textContent = "";
+          render();
+        });
+
+        item.append(word, remove);
+        tokenArea.append(item);
       });
-      tokenArea.append(word);
-    });
+    }
+    render();
 
     const actions = document.createElement("div");
     actions.className = "ysc-actions";
@@ -114,14 +153,14 @@
     save.className = "ysc-primary";
     save.textContent = "Save structure";
     save.addEventListener("click", async () => {
-      if (!selected.size) {
+      if (!tokens.some((token) => token.selected && !token.removed)) {
         status.textContent = "Select at least one word.";
         return;
       }
       save.disabled = true;
       playVideo();
       try {
-        const saved = await saveStructure(original, YSC.buildPattern(original, selected), startSeconds);
+        const saved = await saveStructure(currentOriginal(), currentPattern(), startSeconds);
         status.textContent = saved ? "Saved." : "This structure is already saved.";
         setTimeout(closeEditor, 700);
       } catch (error) {
@@ -130,8 +169,9 @@
       }
     });
     actions.append(cancel, save);
-    editor.append(heading, tokenArea, status, actions);
+    editor.append(heading, sentence, tokenArea, status, actions);
     document.body.append(editor);
+    document.addEventListener("pointerdown", onOutsidePointerDown, true);
     editor.querySelector(".ysc-word")?.focus();
   }
 
