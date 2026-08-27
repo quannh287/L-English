@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.0](https://github.com/quannh287/L-English/compare/v0.5.0...v0.6.0) (2026-08-27)
+
+
+### Features
+
+* **popup:** drill only due structures in practice mode ([2d2d98c](https://github.com/quannh287/L-English/commit/2d2d98cc2a1b83b1bf35fb6ee1d04a648a4ad391))
+
 ## [0.5.0](https://github.com/quannh287/L-English/compare/v0.4.0...v0.5.0) (2026-08-27)
 
 
