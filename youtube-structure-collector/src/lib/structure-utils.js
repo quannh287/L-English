@@ -11,6 +11,10 @@
     return /[\p{L}\p{N}]/u.test(token);
   }
 
+  function normalizeText(text) {
+    return String(text || "").replace(/\s+/g, " ").trim();
+  }
+
   function buildPattern(text, selectedTokenIndexes) {
     const selected = new Set(selectedTokenIndexes);
     return tokenize(text)
@@ -74,6 +78,7 @@
     PLACEHOLDER,
     tokenize,
     isWord,
+    normalizeText,
     buildPattern,
     isDuplicate,
     sanitizeFilename,

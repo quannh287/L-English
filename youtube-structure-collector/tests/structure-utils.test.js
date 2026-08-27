@@ -11,6 +11,10 @@ test("builds patterns from selected words", () => {
   assert.equal(YSC.buildPattern(text, selected), "I was supposed to [____].");
 });
 
+test("normalizes text collected from multiple caption segments", () => {
+  assert.equal(YSC.normalizeText("  I was\n  supposed to call.  "), "I was supposed to call.");
+});
+
 test("detects duplicate structures", () => {
   const candidate = { original: "Can we leave?", pattern: "Can we [____]?" };
   assert.equal(YSC.isDuplicate([candidate], candidate), true);

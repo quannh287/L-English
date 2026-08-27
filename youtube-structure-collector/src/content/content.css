@@ -16,6 +16,16 @@
   color: #065fd4;
 }
 
+.ytp-caption-segment[data-ysc-ready="true"] {
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.ytp-caption-segment[data-ysc-ready="true"]:hover {
+  outline: 2px solid #facc15;
+  outline-offset: 3px;
+}
+
 .ysc-editor {
   background: #fff;
   border: 1px solid #ddd;

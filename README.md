@@ -8,7 +8,7 @@ A lightweight Chrome extension for turning visible YouTube transcript sentences 
 
 ## Features
 
-- Capture a sentence directly from the YouTube transcript.
+- Capture a sentence from an on-video subtitle or the YouTube transcript.
 - Select words to replace with `[____]`.
 - Keep structures grouped by video.
 - Edit or delete saved patterns.
@@ -26,8 +26,8 @@ A lightweight Chrome extension for turning visible YouTube transcript sentences 
 
 ## Use
 
-1. Open a YouTube video and expand its transcript.
-2. Select **+ Structure** beside a transcript sentence.
+1. Open a YouTube video with subtitles or expand its transcript.
+2. Click a subtitle over the video, or select **+ Structure** beside a transcript sentence.
 3. Select one or more words to hide.
 4. Select **Save structure**.
 5. Open the extension popup to review, edit, copy, or download your collection.
@@ -50,6 +50,6 @@ The extension has no backend, analytics, or account system. Saved structures rem
 
 ## Current limitations
 
-- Only transcript lines displayed by YouTube are supported.
+- Only subtitles currently displayed over the video and lines in YouTube's transcript panel are supported.
 - The extension does not fetch hidden subtitles or process audio.
 - YouTube markup changes may require updates to the transcript selectors.

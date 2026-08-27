@@ -3,6 +3,7 @@
 
   const SEGMENT_SELECTOR = "ytd-transcript-segment-renderer";
   const TEXT_SELECTOR = "yt-formatted-string.segment-text";
+  const CAPTION_SELECTOR = ".ytp-caption-segment";
   let editor;
 
   function videoTitle() {
@@ -46,6 +47,14 @@
     editor = null;
   }
 
+  function pauseVideo() {
+    document.querySelector("video")?.pause();
+  }
+
+  function playVideo() {
+    document.querySelector("video")?.play().catch(() => {});
+  }
+
   function openEditor(original) {
     closeEditor();
     const selected = new Set();
@@ -87,7 +96,10 @@
     const cancel = document.createElement("button");
     cancel.type = "button";
     cancel.textContent = "Cancel";
-    cancel.addEventListener("click", closeEditor);
+    cancel.addEventListener("click", () => {
+      playVideo();
+      closeEditor();
+    });
     const save = document.createElement("button");
     save.type = "button";
     save.className = "ysc-primary";
@@ -98,6 +110,7 @@
         return;
       }
       save.disabled = true;
+      playVideo();
       try {
         const saved = await saveStructure(original, YSC.buildPattern(original, selected));
         status.textContent = saved ? "Saved." : "This structure is already saved.";
@@ -138,17 +151,45 @@
     });
   }
 
+  function enhanceCaptions(root = document) {
+    const captions = root.matches?.(CAPTION_SELECTOR)
+      ? [root, ...root.querySelectorAll(CAPTION_SELECTOR)]
+      : root.querySelectorAll(CAPTION_SELECTOR);
+    captions.forEach((caption) => {
+      if (caption.dataset.yscReady) return;
+      caption.dataset.yscReady = "true";
+      caption.title = "Click to create a structure";
+      caption.addEventListener("click", (event) => {
+        const captionWindow = caption.closest(".caption-window");
+        const segments = captionWindow?.querySelectorAll(CAPTION_SELECTOR) || [caption];
+        const original = YSC.normalizeText(
+          Array.from(segments, (segment) => segment.textContent).join(" ")
+        );
+        if (!original) return;
+        event.preventDefault();
+        event.stopPropagation();
+        pauseVideo();
+        openEditor(original);
+      });
+    });
+  }
+
+  function enhancePage(root = document) {
+    enhanceTranscript(root);
+    enhanceCaptions(root);
+  }
+
   const observer = new MutationObserver((mutations) => {
     for (const mutation of mutations) {
       for (const node of mutation.addedNodes) {
-        if (node.nodeType === Node.ELEMENT_NODE) enhanceTranscript(node);
+        if (node.nodeType === Node.ELEMENT_NODE) enhancePage(node);
       }
     }
   });
 
   function start() {
     closeEditor();
-    enhanceTranscript();
+    enhancePage();
     observer.disconnect();
     observer.observe(document.documentElement, { childList: true, subtree: true });
   }

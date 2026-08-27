@@ -11,8 +11,8 @@ A dependency-free Chrome extension that turns visible YouTube transcript sentenc
 
 ## Use
 
-1. Open a YouTube video and expand its transcript.
-2. Select **+ Structure** beside a transcript sentence.
+1. Open a YouTube video with subtitles or an available transcript.
+2. Click a subtitle over the video, or select **+ Structure** beside a transcript sentence.
 3. Select one or more words to replace with `[____]`, then save.
 4. Open the extension popup to edit, delete, copy, or download the structures for the current video.
 
@@ -42,6 +42,6 @@ npm run check
 
 ## v1 limits
 
-- Only transcript lines displayed by YouTube are supported.
+- Only subtitles currently displayed over the video and lines in YouTube's transcript panel are supported.
 - The extension does not fetch hidden subtitles or process audio.
 - YouTube may change its transcript markup; update the selectors in `src/content/content-script.js` if capture buttons stop appearing.
