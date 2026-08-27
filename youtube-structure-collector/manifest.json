@@ -8,7 +8,8 @@
     "activeTab"
   ],
   "host_permissions": [
-    "https://api.dictionaryapi.dev/*"
+    "https://api.dictionaryapi.dev/*",
+    "https://en.wiktionary.org/*"
   ],
   "icons": {
     "16": "assets/icons/icon-16.png",

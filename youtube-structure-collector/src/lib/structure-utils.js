@@ -3,6 +3,8 @@
 
   const PLACEHOLDER = "[____]";
   const DICTIONARY_URL = "https://api.dictionaryapi.dev/api/v2/entries/en/";
+  const WIKTIONARY_URL = "https://en.wiktionary.org/api/rest_v1/page/definition/";
+  const HTML_ENTITIES = { amp: "&", lt: "<", gt: ">", quot: "\"", "#39": "'", nbsp: " " };
   const REQUEST_TIMEOUT_MS = 8000;
 
   // Every network call goes through here: one place for the timeout and the non-OK/error contract (null).
@@ -15,17 +17,41 @@
     }
   };
 
-  // Wiktionary-backed, English-English, no key. Returns null when the word is unknown or the call fails.
+  function stripHtml(html) {
+    return normalizeText(
+      String(html || "")
+        .replace(/<[^>]*>/g, "")
+        .replace(/&(amp|lt|gt|quot|#39|nbsp);/g, (_, name) => HTML_ENTITIES[name])
+    );
+  }
+
+  function labelledSense(partOfSpeech, definition) {
+    return partOfSpeech ? `(${partOfSpeech.toLowerCase()}) ${definition}` : definition;
+  }
+
+  // Definitions only, but its backend stays up when dictionaryapi.dev's origin 522s.
+  async function lookupWiktionary(term) {
+    const groups = (await requestJson(WIKTIONARY_URL + encodeURIComponent(term.replace(/\s+/g, "_"))))?.en || [];
+    for (const group of groups) {
+      for (const item of group.definitions || []) {
+        const definition = stripHtml(item.definition);
+        if (definition) return { ipa: "", meaning: labelledSense(group.partOfSpeech, definition) };
+      }
+    }
+    return null;
+  }
+
+  // English-English, no key. dictionaryapi.dev first because it carries IPA; Wiktionary when it is down.
   async function lookupWord(word) {
     const term = normalizeText(word).toLowerCase();
     if (!term) return null;
     const [entry] = (await requestJson(DICTIONARY_URL + encodeURIComponent(term))) || [];
     const sense = entry?.meanings?.[0];
     const definition = sense?.definitions?.find((item) => item.definition)?.definition;
-    if (!definition) return null;
+    if (!definition) return lookupWiktionary(term);
     return {
       ipa: entry.phonetic || entry.phonetics?.find((item) => item.text)?.text || "",
-      meaning: sense.partOfSpeech ? `(${sense.partOfSpeech}) ${definition}` : definition
+      meaning: labelledSense(sense.partOfSpeech, definition)
     };
   }
 
@@ -205,6 +231,7 @@
     formatText,
     formatWordsMarkdown,
     lookupWord,
+    lookupWiktionary,
     requestJson,
     getVideoId,
     checkAnswer,
