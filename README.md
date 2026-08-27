@@ -69,7 +69,13 @@ Building requires macOS, Linux, or WSL — the scripts are Bash and use `zip`/`u
 cd youtube-structure-collector
 npm test
 npm run check
+
+npm run install:local            # build this checkout into ~/Documents/youtube-structure-collector
+npm run install:local -- latest  # or drop the newest GitHub release there instead
 ```
+
+Both overwrite that folder in place, so Chrome's "Load unpacked" entry keeps
+working — it picks up the new files on restart, or on the card's reload arrow.
 
 See the [extension README](youtube-structure-collector/README.md) for its internal project structure.
 
