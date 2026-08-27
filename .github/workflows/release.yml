@@ -41,5 +41,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: googleapis/release-please-action@v4
+        id: release-pr
         with:
           skip-github-release: true
+
+      - name: Request review from repository owner
+        if: steps.release-pr.outputs.prs_created == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ fromJSON(steps.release-pr.outputs.pr).number }}
+        run: gh pr edit "$PR_NUMBER" --add-reviewer "$GITHUB_REPOSITORY_OWNER"
