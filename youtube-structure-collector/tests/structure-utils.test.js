@@ -62,3 +62,44 @@ test("returns an empty list when the pattern has no blanks", () => {
   const original = "Can we leave?";
   assert.deepEqual(YSC.extractBlanks(original, original), []);
 });
+
+test("marks a never-reviewed structure as due", () => {
+  assert.equal(YSC.isDue({ original: "x", pattern: "x" }), true);
+});
+
+test("marks a recently reviewed structure as not due yet", () => {
+  const now = Date.parse("2026-01-10T00:00:00Z");
+  const item = { reviewCount: 1, lastReviewedAt: "2026-01-09T12:00:00Z" };
+  assert.equal(YSC.isDue(item, now), false);
+});
+
+test("marks a structure as due once its interval has passed", () => {
+  const now = Date.parse("2026-01-10T00:00:00Z");
+  const item = { reviewCount: 1, lastReviewedAt: "2026-01-08T00:00:00Z" };
+  assert.equal(YSC.isDue(item, now), true);
+});
+
+test("formats a library export across multiple videos, skipping empty ones", () => {
+  const videos = {
+    a: {
+      title: "Video A",
+      url: "https://www.youtube.com/watch?v=a",
+      structures: [{ original: "Can we leave?", pattern: "Can we [____]?" }]
+    },
+    b: { title: "Video B (empty)", url: "https://www.youtube.com/watch?v=b", structures: [] },
+    c: {
+      title: "Video C",
+      url: "https://www.youtube.com/watch?v=c",
+      structures: [{ original: "I was supposed to call.", pattern: "I was supposed to [____]." }]
+    }
+  };
+  const markdown = YSC.formatLibraryMarkdown(videos);
+  assert.match(markdown, /# Video A/);
+  assert.match(markdown, /# Video C/);
+  assert.doesNotMatch(markdown, /Video B/);
+
+  const text = YSC.formatLibraryText(videos);
+  assert.match(text, /Video A/);
+  assert.match(text, /Video C/);
+  assert.doesNotMatch(text, /Video B/);
+});

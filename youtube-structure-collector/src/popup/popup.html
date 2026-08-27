@@ -12,7 +12,11 @@
       <p id="status" role="status">Loading…</p>
       <section id="collection" hidden>
         <a id="video-title" target="_blank" rel="noreferrer"></a>
-        <button id="practice" type="button">Practice</button>
+        <div class="view-actions">
+          <button id="practice" type="button">Practice</button>
+          <button id="show-library" type="button">All videos</button>
+        </div>
+        <input id="search" type="search" placeholder="Search structures" aria-label="Search structures for this video">
         <div id="structures"></div>
         <div class="export-actions">
           <button id="copy" type="button">Copy Markdown</button>
@@ -20,6 +24,18 @@
           <button id="download-txt" type="button">Download TXT</button>
         </div>
         <button id="clear" class="danger" type="button">Clear this video</button>
+      </section>
+      <section id="library" hidden>
+        <div class="view-actions">
+          <button id="show-current" type="button">Back to this video</button>
+        </div>
+        <input id="library-search" type="search" placeholder="Search all structures" aria-label="Search all structures">
+        <div id="library-groups"></div>
+        <div class="export-actions">
+          <button id="library-copy" type="button">Copy Markdown</button>
+          <button id="library-download-md" type="button">Download MD</button>
+          <button id="library-download-txt" type="button">Download TXT</button>
+        </div>
       </section>
       <section id="quiz" hidden>
         <p id="quiz-score"></p>

@@ -95,6 +95,28 @@
     return blanks;
   }
 
+  const REVIEW_INTERVALS_DAYS = [0, 1, 3, 7, 14, 30];
+  const DAY_MS = 86400000;
+
+  function isDue(item, now = Date.now()) {
+    if (!item.lastReviewedAt) return true;
+    const index = Math.min(item.reviewCount || 0, REVIEW_INTERVALS_DAYS.length - 1);
+    const intervalMs = REVIEW_INTERVALS_DAYS[index] * DAY_MS;
+    return now - new Date(item.lastReviewedAt).getTime() >= intervalMs;
+  }
+
+  function nonEmptyVideos(videos) {
+    return Object.values(videos).filter((video) => video.structures.length);
+  }
+
+  function formatLibraryMarkdown(videos) {
+    return nonEmptyVideos(videos).map(formatMarkdown).join("\n");
+  }
+
+  function formatLibraryText(videos) {
+    return nonEmptyVideos(videos).map(formatText).join("\n");
+  }
+
   const api = {
     PLACEHOLDER,
     tokenize,
@@ -107,7 +129,10 @@
     formatText,
     getVideoId,
     checkAnswer,
-    extractBlanks
+    extractBlanks,
+    isDue,
+    formatLibraryMarkdown,
+    formatLibraryText
   };
 
   root.YSC = api;

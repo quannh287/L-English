@@ -4,8 +4,14 @@
   const status = document.querySelector("#status");
   const collection = document.querySelector("#collection");
   const titleLink = document.querySelector("#video-title");
+  const searchInput = document.querySelector("#search");
   const structuresElement = document.querySelector("#structures");
   const practiceButton = document.querySelector("#practice");
+  const showLibraryButton = document.querySelector("#show-library");
+  const library = document.querySelector("#library");
+  const showCurrentButton = document.querySelector("#show-current");
+  const librarySearchInput = document.querySelector("#library-search");
+  const libraryGroups = document.querySelector("#library-groups");
   const quiz = document.querySelector("#quiz");
   const quizScoreElement = document.querySelector("#quiz-score");
   const quizPatternElement = document.querySelector("#quiz-pattern");
@@ -15,6 +21,7 @@
   const quizNextButton = document.querySelector("#quiz-next");
   let videoId;
   let video;
+  let allVideos = {};
   let quizItems = [];
   let quizIndex = 0;
   let quizScore = 0;
@@ -23,7 +30,20 @@
   async function persist() {
     const { videos = {} } = await chrome.storage.local.get("videos");
     videos[videoId] = video;
+    allVideos = videos;
     await chrome.storage.local.set({ videos });
+  }
+
+  function matchesSearch(item, query) {
+    if (!query) return true;
+    return `${item.original} ${item.pattern}`.toLowerCase().includes(query.toLowerCase());
+  }
+
+  function dueBadge() {
+    const badge = document.createElement("span");
+    badge.className = "due-badge";
+    badge.textContent = "Due";
+    return badge;
   }
 
   function render() {
@@ -40,12 +60,22 @@
       return;
     }
 
-    video.structures.forEach((item) => {
+    const visible = video.structures.filter((item) => matchesSearch(item, searchInput.value));
+    if (!visible.length) {
+      const empty = document.createElement("p");
+      empty.className = "empty";
+      empty.textContent = "No structures match your search.";
+      structuresElement.append(empty);
+      return;
+    }
+
+    visible.forEach((item) => {
       const card = document.createElement("article");
       card.className = "structure";
       const original = document.createElement("p");
       original.className = "original";
-      original.textContent = item.original;
+      if (YSC.isDue(item)) original.append(dueBadge());
+      original.append(item.original);
       const row = document.createElement("div");
       row.className = "pattern-row";
       const input = document.createElement("input");
@@ -71,6 +101,46 @@
       row.append(input, remove);
       card.append(original, row);
       structuresElement.append(card);
+    });
+  }
+
+  function renderLibrary() {
+    libraryGroups.replaceChildren();
+    const query = librarySearchInput.value;
+    const groups = Object.values(allVideos)
+      .map((entry) => ({ entry, items: entry.structures.filter((item) => matchesSearch(item, query)) }))
+      .filter(({ items }) => items.length);
+
+    if (!groups.length) {
+      const empty = document.createElement("p");
+      empty.className = "empty";
+      empty.textContent = query ? "No structures match your search." : "No structures saved yet.";
+      libraryGroups.append(empty);
+      return;
+    }
+
+    groups.forEach(({ entry, items }) => {
+      const group = document.createElement("section");
+      group.className = "library-group";
+      const title = document.createElement("a");
+      title.className = "library-group-title";
+      title.target = "_blank";
+      title.rel = "noreferrer";
+      title.href = entry.url;
+      title.textContent = entry.title;
+      group.append(title);
+
+      items.forEach((item) => {
+        const original = document.createElement("p");
+        original.className = "original";
+        if (YSC.isDue(item)) original.append(dueBadge());
+        original.append(item.original);
+        const pattern = document.createElement("p");
+        pattern.className = "pattern";
+        pattern.textContent = item.pattern;
+        group.append(original, pattern);
+      });
+      libraryGroups.append(group);
     });
   }
 
@@ -112,7 +182,7 @@
     return blanks && blanks.length ? blanks.join(" ") : item.original;
   }
 
-  function checkQuizAnswer() {
+  async function checkQuizAnswer() {
     if (quizAnswered || quizIndex >= quizItems.length) return;
     const item = quizItems[quizIndex];
     const answer = expectedAnswer(item);
@@ -123,6 +193,10 @@
     quizAnswerInput.disabled = true;
     quizCheckButton.hidden = true;
     quizNextButton.hidden = false;
+
+    item.reviewCount = correct ? (item.reviewCount || 0) + 1 : 0;
+    item.lastReviewedAt = new Date().toISOString();
+    await persist();
   }
 
   function startQuiz() {
@@ -154,11 +228,24 @@
     collection.hidden = false;
   });
 
-  function download(contents, extension) {
+  searchInput.addEventListener("input", render);
+  librarySearchInput.addEventListener("input", renderLibrary);
+
+  showLibraryButton.addEventListener("click", () => {
+    collection.hidden = true;
+    library.hidden = false;
+    renderLibrary();
+  });
+  showCurrentButton.addEventListener("click", () => {
+    library.hidden = true;
+    collection.hidden = false;
+  });
+
+  function download(contents, extension, filename) {
     const blob = new Blob([contents], { type: "text/plain;charset=utf-8" });
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
-    link.download = `${YSC.sanitizeFilename(video.title)}.${extension}`;
+    link.download = `${filename}.${extension}`;
     link.click();
     setTimeout(() => URL.revokeObjectURL(link.href), 0);
   }
@@ -169,15 +256,28 @@
     setTimeout(() => { event.currentTarget.textContent = "Copy Markdown"; }, 900);
   });
   document.querySelector("#download-md").addEventListener("click", () => {
-    download(YSC.formatMarkdown(video), "md");
+    download(YSC.formatMarkdown(video), "md", YSC.sanitizeFilename(video.title));
   });
   document.querySelector("#download-txt").addEventListener("click", () => {
-    download(YSC.formatText(video), "txt");
+    download(YSC.formatText(video), "txt", YSC.sanitizeFilename(video.title));
+  });
+
+  document.querySelector("#library-copy").addEventListener("click", async (event) => {
+    await navigator.clipboard.writeText(YSC.formatLibraryMarkdown(allVideos));
+    event.currentTarget.textContent = "Copied";
+    setTimeout(() => { event.currentTarget.textContent = "Copy Markdown"; }, 900);
+  });
+  document.querySelector("#library-download-md").addEventListener("click", () => {
+    download(YSC.formatLibraryMarkdown(allVideos), "md", "youtube-structures-library");
+  });
+  document.querySelector("#library-download-txt").addEventListener("click", () => {
+    download(YSC.formatLibraryText(allVideos), "txt", "youtube-structures-library");
   });
   document.querySelector("#clear").addEventListener("click", async () => {
     if (!confirm("Delete all structures saved for this video?")) return;
     const { videos = {} } = await chrome.storage.local.get("videos");
     delete videos[videoId];
+    allVideos = videos;
     await chrome.storage.local.set({ videos });
     video.structures = [];
     render();
@@ -192,6 +292,7 @@
     }
 
     const { videos = {} } = await chrome.storage.local.get("videos");
+    allVideos = videos;
     video = videos[videoId] || {
       videoId,
       title: tab.title?.replace(/\s*-\s*YouTube$/, "") || "YouTube video",
