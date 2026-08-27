@@ -8,17 +8,25 @@ SRC="$(cd "$(dirname "$0")" && pwd)"
 DEST="$HOME/Documents/youtube-structure-collector"
 
 if [ "$SRC" != "$DEST" ]; then
+  # Copy into a staging dir first so a failed copy can't leave Chrome pointing
+  # at a half-replaced folder.
+  STAGE="$(mktemp -d)"
+  trap 'rm -rf "$STAGE"' EXIT
+  (cd "$SRC" && tar cf - manifest.json assets src) | (cd "$STAGE" && tar xf -)
   rm -rf "$DEST"
-  mkdir -p "$DEST"
-  (cd "$SRC" && tar cf - manifest.json assets src) | (cd "$DEST" && tar xf -)
+  mkdir -p "$(dirname "$DEST")"
+  mv "$STAGE" "$DEST"
+  trap - EXIT
 fi
+
+VERSION="$(sed -n 's/.*"version"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' "$DEST/manifest.json" | head -1)"
 
 printf '%s' "$DEST" | pbcopy
 open -a "Google Chrome" "chrome://extensions/" 2>/dev/null || true
 
 cat <<TXT
 
-Installed to (path copied to clipboard):
+Installed v$VERSION to (path copied to clipboard):
   $DEST
 
 In the Chrome tab that just opened:
