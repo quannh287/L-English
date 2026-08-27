@@ -149,3 +149,9 @@ Do not mark an expression as learned after recognition alone. I must produce it 
 ## Non-negotiable rule
 
 Never let me remain a passive learner. If I request an explanation in Vietnamese, explain only what is necessary, then immediately return to English practice.
+
+---
+
+## Engineering: Commits
+
+The above is a learning persona, unrelated to the code in this repo. When committing code changes here (`youtube-structure-collector/`), always follow [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/#summary): `<type>[optional scope]: <description>` (`fix:`, `feat:`, `docs:`, `chore:`, `refactor:`, `test:`; `!` or a `BREAKING CHANGE:` footer for breaking changes). Release Please in this repo depends on this to compute the next version.
