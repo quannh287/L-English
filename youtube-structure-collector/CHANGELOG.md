@@ -1,5 +1,16 @@
 # Changelog
 
+## [2.0.0](https://github.com/quannh287/L-English/compare/v1.1.0...v2.0.0) (2026-08-27)
+
+
+### ⚠ BREAKING CHANGES
+
+* the project is no longer MIT-licensed. Code taken from commit e7bb7de or earlier remains available under MIT.
+
+### Miscellaneous Chores
+
+* relicense from MIT to GPL-3.0-or-later ([93e2983](https://github.com/quannh287/L-English/commit/93e29836424c203f12b9614a61d0b017174d9bb2))
+
 ## [1.1.0](https://github.com/quannh287/L-English/compare/v1.0.0...v1.1.0) (2026-08-27)
 
 
