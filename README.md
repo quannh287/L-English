@@ -43,10 +43,22 @@ Chrome only loads extensions from the Web Store *or* from a folder on your compu
 1. Clone this repository.
 2. Follow steps 3–7 above, but in step 6 select the `youtube-structure-collector` subdirectory of the clone (not the repo root).
 
+### C. One command, and updates take care of themselves
+
+If you have this repository cloned and the [GitHub CLI](https://cli.github.com) installed:
+
+```sh
+bash youtube-structure-collector/scripts/install-local.sh latest
+```
+
+That downloads the newest release, replaces `~/Documents/youtube-structure-collector`, and prints the version it installed. Do the **Load unpacked** steps above once, pointing at that folder — from then on, re-running the same command is the whole update: Chrome reloads the folder next time you start it, or immediately if you click the refresh icon on the extension's card.
+
+Requires macOS, Linux, or WSL. Nothing is installed outside that one folder.
+
 ### Updating or removing
 
-- To update: repeat the install steps with a newer ZIP, or click the refresh icon on the extension's card in `chrome://extensions`.
-- To remove: click **Remove** on the extension's card in `chrome://extensions`.
+- To update: re-run the command in option C, or repeat the install steps with a newer ZIP, or click the refresh icon on the extension's card in `chrome://extensions`.
+- To remove: click **Remove** on the extension's card in `chrome://extensions`, then delete `~/Documents/youtube-structure-collector`.
 
 ## Use
 

@@ -37,7 +37,8 @@ rm -rf "$DEST"
 mkdir -p "$(dirname "$DEST")"
 mv "$STAGE/unpacked" "$DEST"
 
-VERSION="$(node -p "require('$DEST/manifest.json').version")"
+# sed, not node — the download path shouldn't need a toolchain installed.
+VERSION="$(sed -n 's/.*"version"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' "$DEST/manifest.json" | head -1)"
 echo "Installed v$VERSION to: $DEST"
 if command -v pbcopy >/dev/null; then
   printf '%s' "$DEST" | pbcopy
