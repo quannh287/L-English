@@ -103,6 +103,12 @@
     return lines.join("\n").trimEnd() + "\n";
   }
 
+  function formatWordsMarkdown(words) {
+    const lines = ["# Vocabulary", ""];
+    words.forEach((item) => lines.push(item.meaning ? `- **${item.word}** — ${item.meaning}` : `- **${item.word}**`));
+    return lines.join("\n").trimEnd() + "\n";
+  }
+
   function getVideoId(url) {
     try {
       return new URL(url).searchParams.get("v");
@@ -168,6 +174,7 @@
     sanitizeFilename,
     formatMarkdown,
     formatText,
+    formatWordsMarkdown,
     getVideoId,
     checkAnswer,
     extractBlanks,

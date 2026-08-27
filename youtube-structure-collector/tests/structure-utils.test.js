@@ -168,3 +168,11 @@ test("exports the timestamp when a structure has one", () => {
   assert.match(YSC.formatMarkdown(video), /At: 1:23 — https:\/\/www\.youtube\.com\/watch\?v=abc&t=83s/);
   assert.equal((YSC.formatText(video).match(/^At: /gm) || []).length, 1);
 });
+
+test("formatWordsMarkdown lists words with optional meanings", () => {
+  const markdown = YSC.formatWordsMarkdown([
+    { word: "linger", meaning: "nán lại" },
+    { word: "blunt" }
+  ]);
+  assert.equal(markdown, "# Vocabulary\n\n- **linger** — nán lại\n- **blunt**\n");
+});

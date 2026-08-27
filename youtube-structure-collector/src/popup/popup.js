@@ -19,6 +19,13 @@
   const quizFeedback = document.querySelector("#quiz-feedback");
   const quizCheckButton = document.querySelector("#quiz-check");
   const quizNextButton = document.querySelector("#quiz-next");
+  const wordsSection = document.querySelector("#words");
+  const showWordsButton = document.querySelector("#show-words");
+  const wordForm = document.querySelector("#word-form");
+  const wordInput = document.querySelector("#word-input");
+  const meaningInput = document.querySelector("#meaning-input");
+  const wordList = document.querySelector("#word-list");
+  let words = [];
   let videoId;
   let video;
   let allVideos = {};
@@ -204,6 +211,77 @@
     });
   }
 
+  async function persistWords() {
+    await chrome.storage.local.set({ words });
+  }
+
+  function renderWords() {
+    wordList.replaceChildren();
+    if (!words.length) {
+      const empty = document.createElement("p");
+      empty.className = "empty";
+      empty.textContent = "No words yet. Add one above.";
+      wordList.append(empty);
+      return;
+    }
+    words.forEach((item) => {
+      const row = document.createElement("div");
+      row.className = "word-item";
+      const word = document.createElement("span");
+      word.className = "word";
+      word.textContent = item.word;
+      const meaning = document.createElement("span");
+      meaning.className = "meaning";
+      meaning.textContent = item.meaning || "";
+      const remove = document.createElement("button");
+      remove.type = "button";
+      remove.className = "word-remove";
+      remove.textContent = "\u00d7";
+      remove.setAttribute("aria-label", `Delete word: ${item.word}`);
+      remove.addEventListener("click", async () => {
+        words = words.filter((entry) => entry.id !== item.id);
+        await persistWords();
+        renderWords();
+      });
+      row.append(word, meaning, remove);
+      wordList.append(row);
+    });
+  }
+
+  wordForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const word = wordInput.value.trim();
+    if (!word) return;
+    const meaning = meaningInput.value.trim();
+    const existing = words.find((entry) => entry.word.toLowerCase() === word.toLowerCase());
+    if (existing) existing.meaning = meaning;
+    else words.push({ id: crypto.randomUUID(), word, meaning, createdAt: new Date().toISOString() });
+    wordInput.value = "";
+    meaningInput.value = "";
+    await persistWords();
+    renderWords();
+    wordInput.focus();
+  });
+
+  showWordsButton.addEventListener("click", () => {
+    collection.hidden = true;
+    wordsSection.hidden = false;
+    renderWords();
+    wordInput.focus();
+  });
+  document.querySelector("#words-back").addEventListener("click", () => {
+    wordsSection.hidden = true;
+    collection.hidden = false;
+  });
+  document.querySelector("#words-copy").addEventListener("click", async (event) => {
+    await navigator.clipboard.writeText(YSC.formatWordsMarkdown(words));
+    event.currentTarget.textContent = "Copied";
+    setTimeout(() => { event.currentTarget.textContent = "Copy Markdown"; }, 900);
+  });
+  document.querySelector("#words-download-md").addEventListener("click", () => {
+    download(YSC.formatWordsMarkdown(words), "md", "vocabulary");
+  });
+
   function shuffled(items) {
     const copy = [...items];
     for (let i = copy.length - 1; i > 0; i--) {
@@ -366,8 +444,9 @@
     const onWatchPage = Boolean(tab?.url?.startsWith("https://www.youtube.com/watch"));
     const tabVideoId = onWatchPage ? YSC.getVideoId(tab.url) : null;
 
-    const { videos = {} } = await chrome.storage.local.get("videos");
+    const { videos = {}, words: savedWords = [] } = await chrome.storage.local.get(["videos", "words"]);
     allVideos = videos;
+    words = savedWords;
 
     if (tabVideoId) {
       videoId = tabVideoId;
