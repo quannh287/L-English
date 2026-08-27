@@ -7,11 +7,19 @@ on:
         description: Git tag created by Release Please
         required: true
         type: string
+      commit_sha:
+        description: Release commit to build before the draft release creates its tag
+        required: true
+        type: string
   workflow_dispatch:
     inputs:
       tag_name:
         description: Existing GitHub Release tag to rebuild and publish
         required: true
+        type: string
+      commit_sha:
+        description: Optional commit to build instead of the tag
+        required: false
         type: string
 
 permissions:
@@ -23,7 +31,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ inputs.tag_name }}
+          ref: ${{ inputs.commit_sha || inputs.tag_name }}
 
       - uses: actions/setup-node@v4
         with:

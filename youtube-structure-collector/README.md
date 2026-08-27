@@ -52,7 +52,7 @@ Use Conventional Commits on `main`. Release Please maintains a release pull requ
 - `feat:` creates a minor release.
 - A breaking change creates a major release.
 
-Merging the release pull request updates `package.json`, `package-lock.json`, and `manifest.json`. Release Please then creates the Git tag and a draft GitHub Release and calls the extension publishing workflow with that tag. The publishing workflow checks out the immutable tag, validates and builds the extension, attaches the installable ZIP, and publishes the release.
+Merging the release pull request updates `package.json`, `package-lock.json`, and `manifest.json`. Release Please then creates a draft GitHub Release and passes its tag name and exact release commit to the extension publishing workflow. The publishing workflow checks out that immutable commit, validates and builds the extension, attaches the installable ZIP, and publishes the release and tag.
 
 The **Publish Extension** workflow can also be run manually with an existing release tag to rebuild or replace its ZIP.
 
