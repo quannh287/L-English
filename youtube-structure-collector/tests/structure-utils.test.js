@@ -103,3 +103,68 @@ test("formats a library export across multiple videos, skipping empty ones", () 
   assert.match(text, /Video C/);
   assert.doesNotMatch(text, /Video B/);
 });
+
+test("includes the usage note in exports only when present", () => {
+  const video = {
+    title: "V",
+    url: "https://www.youtube.com/watch?v=abc",
+    structures: [
+      { original: "Can we leave?", pattern: "Can we [____]?", examples: ["Dùng khi muốn rủ về sớm"] },
+      { original: "I'll take that.", pattern: "I'll [____]." }
+    ]
+  };
+  assert.match(YSC.formatMarkdown(video), /Usage: Dùng khi muốn rủ về sớm/);
+  assert.match(YSC.formatText(video), /Usage: Dùng khi muốn rủ về sớm/);
+  assert.equal((YSC.formatText(video).match(/Usage:/g) || []).length, 1);
+});
+
+test("reads examples from the array and falls back to the legacy note", () => {
+  assert.deepEqual(YSC.examplesOf({ examples: ["a", "b"] }), ["a", "b"]);
+  assert.deepEqual(YSC.examplesOf({ note: "legacy" }), ["legacy"]);
+  assert.deepEqual(YSC.examplesOf({}), []);
+});
+
+test("exports every example of a structure", () => {
+  const video = {
+    title: "V",
+    url: "u",
+    structures: [{ original: "o", pattern: "p", examples: ["first", "second"] }]
+  };
+  assert.equal((YSC.formatMarkdown(video).match(/^Usage: /gm) || []).length, 2);
+  assert.match(YSC.formatText(video), /Usage: second/);
+});
+
+test("parses and formats YouTube timestamps", () => {
+  assert.equal(YSC.parseTimestamp("1:23"), 83);
+  assert.equal(YSC.parseTimestamp("1:02:03"), 3723);
+  assert.equal(YSC.parseTimestamp("07"), 7);
+  assert.equal(YSC.parseTimestamp("nope"), null);
+  assert.equal(YSC.parseTimestamp(""), null);
+  assert.equal(YSC.formatTimestamp(83), "1:23");
+  assert.equal(YSC.formatTimestamp(3723), "1:02:03");
+  assert.equal(YSC.formatTimestamp(7), "0:07");
+});
+
+test("builds a deep link at the structure's second", () => {
+  assert.equal(
+    YSC.timestampUrl("https://www.youtube.com/watch?v=abc", 83),
+    "https://www.youtube.com/watch?v=abc&t=83s"
+  );
+  assert.equal(
+    YSC.timestampUrl("https://www.youtube.com/watch?v=abc&t=5s", 83),
+    "https://www.youtube.com/watch?v=abc&t=83s"
+  );
+});
+
+test("exports the timestamp when a structure has one", () => {
+  const video = {
+    title: "V",
+    url: "https://www.youtube.com/watch?v=abc",
+    structures: [
+      { original: "o", pattern: "p", startSeconds: 83 },
+      { original: "o2", pattern: "p2" }
+    ]
+  };
+  assert.match(YSC.formatMarkdown(video), /At: 1:23 — https:\/\/www\.youtube\.com\/watch\?v=abc&t=83s/);
+  assert.equal((YSC.formatText(video).match(/^At: /gm) || []).length, 1);
+});

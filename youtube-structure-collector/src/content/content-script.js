@@ -14,7 +14,7 @@
     );
   }
 
-  async function saveStructure(original, pattern) {
+  async function saveStructure(original, pattern, startSeconds) {
     if (!chrome.storage) {
       throw new Error("Extension was reloaded. Refresh this page and try again.");
     }
@@ -35,6 +35,7 @@
       id: crypto.randomUUID(),
       original,
       pattern,
+      startSeconds,
       createdAt: new Date().toISOString()
     };
     if (YSC.isDuplicate(video.structures, candidate)) return false;
@@ -50,6 +51,11 @@
     editor = null;
   }
 
+  function currentTime() {
+    const seconds = document.querySelector("video")?.currentTime;
+    return Number.isFinite(seconds) ? Math.floor(seconds) : undefined;
+  }
+
   function pauseVideo() {
     document.querySelector("video")?.pause();
   }
@@ -58,7 +64,7 @@
     document.querySelector("video")?.play().catch(() => {});
   }
 
-  function openEditor(original) {
+  function openEditor(original, startSeconds) {
     closeEditor();
     const selected = new Set();
     const tokens = YSC.tokenize(original);
@@ -115,7 +121,7 @@
       save.disabled = true;
       playVideo();
       try {
-        const saved = await saveStructure(original, YSC.buildPattern(original, selected));
+        const saved = await saveStructure(original, YSC.buildPattern(original, selected), startSeconds);
         status.textContent = saved ? "Saved." : "This structure is already saved.";
         setTimeout(closeEditor, 700);
       } catch (error) {
@@ -144,10 +150,13 @@
       button.className = "ysc-save-button";
       button.textContent = "+ Structure";
       button.setAttribute("aria-label", `Create a structure from: ${original}`);
+      const startSeconds = YSC.parseTimestamp(
+        segment.querySelector(".segment-timestamp")?.textContent
+      );
       button.addEventListener("click", (event) => {
         event.preventDefault();
         event.stopPropagation();
-        openEditor(original);
+        openEditor(original, startSeconds ?? currentTime());
       });
       segment.append(button);
       segment.dataset.yscReady = "true";
@@ -172,7 +181,7 @@
         event.preventDefault();
         event.stopPropagation();
         pauseVideo();
-        openEditor(original);
+        openEditor(original, currentTime());
       });
     });
   }

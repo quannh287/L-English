@@ -38,6 +38,35 @@
     return cleaned || "youtube-structures";
   }
 
+  function parseTimestamp(text) {
+    const raw = String(text || "").trim();
+    if (!/^\d{1,2}(:\d{1,2}){0,2}$/.test(raw)) return null;
+    return raw.split(":").reduce((total, part) => total * 60 + Number(part), 0);
+  }
+
+  function formatTimestamp(seconds) {
+    const total = Math.max(0, Math.floor(Number(seconds) || 0));
+    const parts = [Math.floor(total / 3600), Math.floor(total / 60) % 60, total % 60];
+    if (!parts[0]) parts.shift();
+    return parts.map((part, index) => index ? String(part).padStart(2, "0") : String(part)).join(":");
+  }
+
+  function timestampUrl(url, seconds) {
+    try {
+      const parsed = new URL(url);
+      parsed.searchParams.set("t", `${Math.max(0, Math.floor(seconds))}s`);
+      return parsed.toString();
+    } catch {
+      return url;
+    }
+  }
+
+  // ponytail: `note` was the pre-array single example, kept readable here only
+  function examplesOf(item) {
+    if (Array.isArray(item.examples)) return item.examples.filter(Boolean);
+    return item.note ? [item.note] : [];
+  }
+
   function formatMarkdown(video) {
     const lines = [`# ${video.title}`, "", `Video: ${video.url}`, ""];
     video.structures.forEach((item, index) => {
@@ -49,6 +78,10 @@
         `Pattern: ${item.pattern}`,
         ""
       );
+      if (Number.isFinite(item.startSeconds)) {
+        lines.push(`At: ${formatTimestamp(item.startSeconds)} — ${timestampUrl(video.url, item.startSeconds)}`, "");
+      }
+      examplesOf(item).forEach((example) => lines.push(`Usage: ${example}`, ""));
     });
     return lines.join("\n").trimEnd() + "\n";
   }
@@ -59,9 +92,13 @@
       lines.push(
         `Structure ${index + 1}`,
         `Original: ${item.original}`,
-        `Pattern: ${item.pattern}`,
-        ""
+        `Pattern: ${item.pattern}`
       );
+      if (Number.isFinite(item.startSeconds)) {
+        lines.push(`At: ${formatTimestamp(item.startSeconds)} — ${timestampUrl(video.url, item.startSeconds)}`);
+      }
+      examplesOf(item).forEach((example) => lines.push(`Usage: ${example}`));
+      lines.push("");
     });
     return lines.join("\n").trimEnd() + "\n";
   }
@@ -122,6 +159,10 @@
     tokenize,
     isWord,
     normalizeText,
+    examplesOf,
+    parseTimestamp,
+    formatTimestamp,
+    timestampUrl,
     buildPattern,
     isDuplicate,
     sanitizeFilename,
