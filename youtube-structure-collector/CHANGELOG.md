@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.0](https://github.com/quannh287/L-English/compare/v0.7.0...v1.0.0) (2026-08-27)
+
+
+### Miscellaneous Chores
+
+* release 1.0.0 ([2617a53](https://github.com/quannh287/L-English/commit/2617a53bb0d42132ca3a069a4f9f48d241aa9dd5))
+
 ## [0.7.0](https://github.com/quannh287/L-English/compare/v0.6.0...v0.7.0) (2026-08-27)
 
 
