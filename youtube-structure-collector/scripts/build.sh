@@ -28,8 +28,10 @@ cat src/lib/structure-utils.js src/popup/popup.js \
 
 node scripts/finalize-stage.js "$STAGE"
 
+install -m 755 scripts/install.command "$STAGE/install.command"
+
 mkdir -p dist
 rm -f "$ARCHIVE"
-(cd "$STAGE" && zip -qr "$ARCHIVE" manifest.json assets src)
+(cd "$STAGE" && zip -qr "$ARCHIVE" manifest.json assets src install.command)
 
 echo "$ARCHIVE"
