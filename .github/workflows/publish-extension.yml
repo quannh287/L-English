@@ -1,0 +1,47 @@
+name: Publish Extension
+
+on:
+  workflow_call:
+    inputs:
+      tag_name:
+        description: Git tag created by Release Please
+        required: true
+        type: string
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: Existing GitHub Release tag to rebuild and publish
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag_name }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: youtube-structure-collector/package-lock.json
+
+      - name: Validate and build extension
+        working-directory: youtube-structure-collector
+        run: |
+          npm ci
+          npm run check
+          npm run build
+
+      - name: Attach ZIP to GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG_NAME: ${{ inputs.tag_name }}
+        run: |
+          gh release upload "$TAG_NAME" youtube-structure-collector/dist/*.zip --clobber
+          gh release edit "$TAG_NAME" --draft=false

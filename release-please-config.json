@@ -1,0 +1,34 @@
+{
+  "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
+  "packages": {
+    ".": {
+      "release-type": "simple",
+      "package-name": "youtube-structure-collector",
+      "include-component-in-tag": false,
+      "draft": true,
+      "changelog-path": "youtube-structure-collector/CHANGELOG.md",
+      "extra-files": [
+        {
+          "type": "json",
+          "path": "youtube-structure-collector/package.json",
+          "jsonpath": "$.version"
+        },
+        {
+          "type": "json",
+          "path": "youtube-structure-collector/package-lock.json",
+          "jsonpath": "$.version"
+        },
+        {
+          "type": "json",
+          "path": "youtube-structure-collector/package-lock.json",
+          "jsonpath": "$.packages[''].version"
+        },
+        {
+          "type": "json",
+          "path": "youtube-structure-collector/manifest.json",
+          "jsonpath": "$.version"
+        }
+      ]
+    }
+  }
+}

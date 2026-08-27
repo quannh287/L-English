@@ -24,6 +24,7 @@ Saved structures remain on this Chrome profile through `chrome.storage.local`.
 youtube-structure-collector/
 ├── assets/icons/  # Master artwork and Chrome icon sizes
 ├── manifest.json
+├── scripts/         # Release ZIP packaging
 ├── src/
 │   ├── content/    # YouTube transcript integration
 │   ├── lib/        # Shared, testable structure utilities
@@ -31,14 +32,29 @@ youtube-structure-collector/
 └── tests/          # Node built-in tests
 ```
 
-Chrome loads source files directly from `src/`; there is no build step or generated output.
+Chrome loads source files directly from `src/`. The build command packages those runtime files without transpiling, bundling, or minifying them.
 
 ## Test
 
 ```sh
 npm test
 npm run check
+npm run build
 ```
+
+The ZIP is written to `dist/youtube-structure-collector-v<version>.zip`.
+
+## Release
+
+Use Conventional Commits on `main`. Release Please maintains a release pull request and determines the next semantic version:
+
+- `fix:` creates a patch release.
+- `feat:` creates a minor release.
+- A breaking change creates a major release.
+
+Merging the release pull request updates `package.json`, `package-lock.json`, and `manifest.json`. Release Please then creates the Git tag and a draft GitHub Release and calls the extension publishing workflow with that tag. The publishing workflow checks out the immutable tag, validates and builds the extension, attaches the installable ZIP, and publishes the release.
+
+The **Publish Extension** workflow can also be run manually with an existing release tag to rebuild or replace its ZIP.
 
 ## v1 limits
 

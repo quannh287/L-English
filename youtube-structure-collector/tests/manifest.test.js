@@ -5,6 +5,11 @@ const path = require("node:path");
 
 const projectRoot = path.resolve(__dirname, "..");
 const manifest = JSON.parse(fs.readFileSync(path.join(projectRoot, "manifest.json"), "utf8"));
+const packageJson = JSON.parse(fs.readFileSync(path.join(projectRoot, "package.json"), "utf8"));
+
+test("manifest and package versions match", () => {
+  assert.equal(manifest.version, packageJson.version);
+});
 
 test("manifest references existing extension files", () => {
   const referencedFiles = [
