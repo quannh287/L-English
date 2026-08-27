@@ -2,6 +2,12 @@ name: CI
 
 on:
   pull_request:
+    paths-ignore:
+      - .release-please-manifest.json
+      - youtube-structure-collector/CHANGELOG.md
+      - youtube-structure-collector/manifest.json
+      - youtube-structure-collector/package.json
+      - youtube-structure-collector/package-lock.json
   push:
     branches: [main]
 
@@ -29,4 +35,3 @@ jobs:
           name: youtube-structure-collector
           path: youtube-structure-collector/dist/*.zip
           if-no-files-found: error
-
