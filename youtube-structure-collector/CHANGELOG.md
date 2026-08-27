@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.3.1](https://github.com/quannh287/L-English/compare/v0.3.0...v0.3.1) (2026-08-27)
+
+
+### Bug Fixes
+
+* **ci:** prepare releases after publication ([af8b01a](https://github.com/quannh287/L-English/commit/af8b01aa138b5c4e86daf078caa47a8cd160ac45))
+* **ci:** read release PR from manifest output ([51cbfab](https://github.com/quannh287/L-English/commit/51cbfab02eadbf20157611b38c9137b694e6d1b8))
+
 ## [0.3.0](https://github.com/quannh287/L-English/compare/v0.2.0...v0.3.0) (2026-08-27)
 
 
