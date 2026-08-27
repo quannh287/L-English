@@ -10,15 +10,19 @@ A lightweight Chrome extension for turning visible YouTube transcript sentences 
 
 - **Capture a sentence** from an on-video subtitle (click it) or from the YouTube transcript panel (**+ Structure**).
 - **Hide words** you pick — each selection becomes `[____]`; adjacent words merge into one blank.
+- **Trim the sentence** — drop filler words with **Remove** before saving, so the pattern keeps only what matters.
 - **Timestamps** — every structure remembers the second it appears at and links back to that exact moment in the video.
-- **Usage examples** — add your own notes on where and how you'd use a structure (Enter to add, `×` to remove); as many per structure as you like.
-- **Practice mode** — fill-in-the-blank quiz with lenient answer checking (case, punctuation, extra spaces) and a score.
+- **Usage examples** — add your own notes on where and how you'd use a structure (Enter to add, trash icon to remove); as many per structure as you like.
+- **Vocabulary notebook** — save a word or phrase straight from a sentence with **Save word**, or add one by hand in the **New Words** tab.
+- **Dictionary lookup** — **Look up** fills in the English meaning and IPA for a saved word (no key, no account); falls back to Wiktionary when the primary source is down.
+- **Edit words in place** — double-click a word or its meaning to rewrite it (Enter saves, Esc reverts).
+- **Practice mode** — fill-in-the-blank quiz with lenient answer checking (case, punctuation, extra spaces), a progress bar, and **Skip**.
 - **Spaced repetition** — practice drills only what's due (0/1/3/7/14/30 days); due items are badged in the list.
 - **Grouped by video**, with a search box for the current video and an **All videos** library view that searches everything.
 - **Edit or delete** any saved pattern, or clear a whole video.
 - **Export** a video or your whole library as Markdown (copy or download) or plain text — timestamps and examples included.
 - **Works off YouTube** — opening the popup elsewhere shows your most recently updated video.
-- **Local only** — everything lives in `chrome.storage.local` on the current Chrome profile.
+- **Local only** — structures and words live in `chrome.storage.local` on the current Chrome profile; the only network call is the dictionary lookup you trigger by hand.
 
 ## Install
 
@@ -53,6 +57,7 @@ Chrome only loads extensions from the Web Store *or* from a folder on your compu
 5. Open the extension popup to review, edit, practice, or export your collection.
 6. In the popup, use the timestamp link to jump back to the line, and the input under a structure to add usage examples (Enter to add).
 7. Select **Practice** to quiz yourself on the structures that are due.
+8. Select **New Words** for your vocabulary notebook — **Look up** fetches a meaning and IPA, and a double-click edits either field.
 
 ## Development
 
@@ -68,7 +73,9 @@ See the [extension README](youtube-structure-collector/README.md) for its intern
 
 ## Privacy
 
-The extension has no backend, analytics, or account system. Saved structures remain in `chrome.storage.local` on the current Chrome profile.
+The extension has no backend, analytics, or account system. Saved structures and words remain in `chrome.storage.local` on the current Chrome profile.
+
+One exception: pressing **Look up** on a saved word sends that single word to `api.dictionaryapi.dev` and, if it fails, `en.wiktionary.org`. Nothing else — no video, sentence, or identifier — ever leaves your machine, and no lookup happens unless you press the button.
 
 ## Current limitations
 
