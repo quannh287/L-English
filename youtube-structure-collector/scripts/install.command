@@ -5,7 +5,7 @@
 set -euo pipefail
 
 SRC="$(cd "$(dirname "$0")" && pwd)"
-DEST="$HOME/Library/Application Support/youtube-structure-collector"
+DEST="$HOME/Documents/youtube-structure-collector"
 
 if [ "$SRC" != "$DEST" ]; then
   rm -rf "$DEST"
