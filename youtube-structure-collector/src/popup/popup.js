@@ -5,8 +5,20 @@
   const collection = document.querySelector("#collection");
   const titleLink = document.querySelector("#video-title");
   const structuresElement = document.querySelector("#structures");
+  const practiceButton = document.querySelector("#practice");
+  const quiz = document.querySelector("#quiz");
+  const quizScoreElement = document.querySelector("#quiz-score");
+  const quizPatternElement = document.querySelector("#quiz-pattern");
+  const quizAnswerInput = document.querySelector("#quiz-answer");
+  const quizFeedback = document.querySelector("#quiz-feedback");
+  const quizCheckButton = document.querySelector("#quiz-check");
+  const quizNextButton = document.querySelector("#quiz-next");
   let videoId;
   let video;
+  let quizItems = [];
+  let quizIndex = 0;
+  let quizScore = 0;
+  let quizAnswered = false;
 
   async function persist() {
     const { videos = {} } = await chrome.storage.local.get("videos");
@@ -18,6 +30,7 @@
     titleLink.textContent = video.title;
     titleLink.href = video.url;
     structuresElement.replaceChildren();
+    practiceButton.disabled = !video.structures.length;
 
     if (!video.structures.length) {
       const empty = document.createElement("p");
@@ -60,6 +73,80 @@
       structuresElement.append(card);
     });
   }
+
+  function shuffled(items) {
+    const copy = [...items];
+    for (let i = copy.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [copy[i], copy[j]] = [copy[j], copy[i]];
+    }
+    return copy;
+  }
+
+  function renderQuizQuestion() {
+    if (quizIndex >= quizItems.length) {
+      quizScoreElement.textContent = `Done: ${quizScore}/${quizItems.length}`;
+      quizPatternElement.textContent = "";
+      quizAnswerInput.hidden = true;
+      quizFeedback.textContent = "";
+      quizCheckButton.hidden = true;
+      quizNextButton.hidden = false;
+      quizNextButton.textContent = "Restart";
+      return;
+    }
+    quizScoreElement.textContent = `Question ${quizIndex + 1}/${quizItems.length} — Score: ${quizScore}`;
+    quizPatternElement.textContent = quizItems[quizIndex].pattern;
+    quizAnswerInput.hidden = false;
+    quizAnswerInput.value = "";
+    quizAnswerInput.disabled = false;
+    quizFeedback.textContent = "";
+    quizAnswered = false;
+    quizCheckButton.hidden = false;
+    quizNextButton.hidden = true;
+    quizNextButton.textContent = "Next";
+    quizAnswerInput.focus();
+  }
+
+  function checkQuizAnswer() {
+    if (quizAnswered || quizIndex >= quizItems.length) return;
+    const item = quizItems[quizIndex];
+    const correct = YSC.checkAnswer(quizAnswerInput.value, item.original);
+    if (correct) quizScore += 1;
+    quizFeedback.textContent = correct ? "Correct!" : `Not quite. Answer: ${item.original}`;
+    quizAnswered = true;
+    quizAnswerInput.disabled = true;
+    quizCheckButton.hidden = true;
+    quizNextButton.hidden = false;
+  }
+
+  function startQuiz() {
+    quizItems = shuffled(video.structures);
+    quizIndex = 0;
+    quizScore = 0;
+    collection.hidden = true;
+    quiz.hidden = false;
+    renderQuizQuestion();
+  }
+
+  practiceButton.addEventListener("click", startQuiz);
+  quizCheckButton.addEventListener("click", checkQuizAnswer);
+  quizNextButton.addEventListener("click", () => {
+    if (quizIndex >= quizItems.length) {
+      startQuiz();
+      return;
+    }
+    quizIndex += 1;
+    renderQuizQuestion();
+  });
+  quizAnswerInput.addEventListener("keydown", (event) => {
+    if (event.key !== "Enter") return;
+    if (quizAnswered) quizNextButton.click();
+    else quizCheckButton.click();
+  });
+  document.querySelector("#quiz-exit").addEventListener("click", () => {
+    quiz.hidden = true;
+    collection.hidden = false;
+  });
 
   function download(contents, extension) {
     const blob = new Blob([contents], { type: "text/plain;charset=utf-8" });

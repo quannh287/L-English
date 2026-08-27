@@ -31,3 +31,11 @@ test("formats exports and sanitizes filenames", () => {
   assert.match(YSC.formatMarkdown(video), /# Friends: Café \/ Scene\?/);
   assert.match(YSC.formatText(video), /Pattern: Can we \[____\]\?/);
 });
+
+test("checks quiz answers leniently", () => {
+  const original = "I was supposed to call you last night.";
+  assert.equal(YSC.checkAnswer("I was supposed to call you last night.", original), true);
+  assert.equal(YSC.checkAnswer("i was supposed to call you last night", original), true);
+  assert.equal(YSC.checkAnswer("  I was supposed to call you last night!  ", original), true);
+  assert.equal(YSC.checkAnswer("I was supposed to text you last night.", original), false);
+});

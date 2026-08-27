@@ -74,6 +74,14 @@
     }
   }
 
+  function normalizeForCompare(text) {
+    return normalizeText(text).toLowerCase().replace(/[.,!?;:]+$/g, "");
+  }
+
+  function checkAnswer(answer, original) {
+    return normalizeForCompare(answer) === normalizeForCompare(original);
+  }
+
   const api = {
     PLACEHOLDER,
     tokenize,
@@ -84,7 +92,8 @@
     sanitizeFilename,
     formatMarkdown,
     formatText,
-    getVideoId
+    getVideoId,
+    checkAnswer
   };
 
   root.YSC = api;

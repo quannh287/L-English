@@ -41,3 +41,11 @@ button:hover, button:focus-visible { background: #e2e5e7; }
 .export-actions button { flex: 1; font-size: 12px; }
 .danger { color: #b3261e; margin-top: 10px; width: 100%; }
 .empty { color: #5f6368; }
+
+#practice { margin-bottom: 12px; width: 100%; }
+#quiz-score { color: #5f6368; margin: 0 0 8px; }
+#quiz-pattern { font-weight: 600; margin: 0 0 10px; }
+#quiz-answer { border: 1px solid #bbb; border-radius: 5px; padding: 7px; width: 100%; }
+#quiz-feedback { margin: 8px 0; min-height: 1.4em; }
+.quiz-actions { display: flex; gap: 6px; margin-bottom: 10px; }
+.quiz-actions button { flex: 1; }

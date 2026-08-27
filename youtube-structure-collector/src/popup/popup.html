@@ -12,6 +12,7 @@
       <p id="status" role="status">Loading…</p>
       <section id="collection" hidden>
         <a id="video-title" target="_blank" rel="noreferrer"></a>
+        <button id="practice" type="button">Practice</button>
         <div id="structures"></div>
         <div class="export-actions">
           <button id="copy" type="button">Copy Markdown</button>
@@ -19,6 +20,17 @@
           <button id="download-txt" type="button">Download TXT</button>
         </div>
         <button id="clear" class="danger" type="button">Clear this video</button>
+      </section>
+      <section id="quiz" hidden>
+        <p id="quiz-score"></p>
+        <p id="quiz-pattern"></p>
+        <input id="quiz-answer" type="text" autocomplete="off" aria-label="Retype the full sentence">
+        <p id="quiz-feedback" role="status" aria-live="polite"></p>
+        <div class="quiz-actions">
+          <button id="quiz-check" type="button">Check</button>
+          <button id="quiz-next" type="button" hidden>Next</button>
+        </div>
+        <button id="quiz-exit" type="button">Back to list</button>
       </section>
     </main>
     <script src="../lib/structure-utils.js"></script>

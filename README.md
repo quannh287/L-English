@@ -16,13 +16,29 @@ A lightweight Chrome extension for turning visible YouTube transcript sentences 
 - Download collections as Markdown or plain text.
 - Store everything locally in the current Chrome profile.
 
-## Install locally
+## Install
+
+Chrome only loads extensions from the Web Store *or* from a folder on your computer with **Developer mode** on — there's no npm/pip step. Pick one:
+
+### A. Download the release ZIP (recommended, no coding needed)
+
+1. Go to the [Releases page](../../releases) and download the ZIP attached to the latest release (e.g. `youtube-structure-collector-v0.3.2.zip`).
+2. Unzip it — you'll get a folder containing `manifest.json` and a `src` folder directly inside it.
+3. In Chrome (or another Chromium browser: Edge, Brave, ...), open `chrome://extensions`.
+4. Turn on **Developer mode** — the toggle is in the top-right corner of that page.
+5. Three new buttons appear. Click **Load unpacked**.
+6. In the file picker, select the folder you unzipped in step 2 (the one *containing* `manifest.json`, not a parent folder).
+7. "YouTube Structure Collector" now appears in your extensions list. Click the puzzle-piece icon in Chrome's toolbar and pin it for one-click access.
+
+### B. Clone the repository (for developers)
 
 1. Clone this repository.
-2. Open `chrome://extensions` in Chrome.
-3. Enable **Developer mode**.
-4. Select **Load unpacked**.
-5. Choose the `youtube-structure-collector` directory.
+2. Follow steps 3–7 above, but in step 6 select the `youtube-structure-collector` subdirectory of the clone (not the repo root).
+
+### Updating or removing
+
+- To update: repeat the install steps with a newer ZIP, or click the refresh icon on the extension's card in `chrome://extensions`.
+- To remove: click **Remove** on the extension's card in `chrome://extensions`.
 
 ## Use
 
