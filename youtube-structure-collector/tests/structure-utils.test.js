@@ -198,3 +198,30 @@ test("lookupWord returns IPA and an English definition", async () => {
     globalThis.fetch = original;
   }
 });
+
+test("lookupWord falls back to Wiktionary when the primary source fails", async () => {
+  const original = globalThis.fetch;
+  const called = [];
+  globalThis.fetch = async (url) => {
+    called.push(url);
+    if (url.includes("dictionaryapi.dev")) return { ok: false };
+    return {
+      ok: true,
+      json: async () => ({
+        en: [{
+          partOfSpeech: "Verb",
+          definitions: [{ definition: "<span class=\"x\"></span>To <a href=\"/wiki/regurgitate\">regurgitate</a> &amp; eject." }]
+        }]
+      })
+    };
+  };
+  try {
+    assert.deepEqual(await YSC.lookupWord("give up"), {
+      ipa: "",
+      meaning: "(verb) To regurgitate & eject."
+    });
+    assert.ok(called[1].endsWith("give_up"), called[1]);
+  } finally {
+    globalThis.fetch = original;
+  }
+});
