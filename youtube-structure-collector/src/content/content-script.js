@@ -53,7 +53,14 @@
     }
     const { words = [] } = await chrome.storage.local.get("words");
     if (words.some((entry) => entry.word.toLowerCase() === word.toLowerCase())) return false;
-    words.push({ id: crypto.randomUUID(), word, meaning: "", createdAt: new Date().toISOString() });
+    const entry = await YSC.lookupWord(word);
+    words.push({
+      id: crypto.randomUUID(),
+      word,
+      meaning: entry?.meaning || "",
+      ipa: entry?.ipa || "",
+      createdAt: new Date().toISOString()
+    });
     await chrome.storage.local.set({ words });
     return true;
   }
@@ -86,6 +93,29 @@
     document.querySelector("video")?.play().catch(() => {});
   }
 
+  const SVG_NS = "http://www.w3.org/2000/svg";
+  const ICON_PATHS = {
+    brand: ["M3 3h6v6H3zM15 15h6v6h-6z", "M9 6h4a2 2 0 0 1 2 2v10"],
+    close: ["M6 6l12 12M18 6L6 18"]
+  };
+
+  function icon(name, size) {
+    const svg = document.createElementNS(SVG_NS, "svg");
+    svg.setAttribute("width", size);
+    svg.setAttribute("height", size);
+    svg.setAttribute("viewBox", "0 0 24 24");
+    svg.setAttribute("fill", "none");
+    svg.setAttribute("stroke", "currentColor");
+    svg.setAttribute("stroke-width", "1.75");
+    svg.setAttribute("stroke-linecap", "round");
+    ICON_PATHS[name].forEach((d) => {
+      const path = document.createElementNS(SVG_NS, "path");
+      path.setAttribute("d", d);
+      svg.append(path);
+    });
+    return svg;
+  }
+
   function openEditor(original, startSeconds) {
     closeEditor();
     const tokens = YSC.tokenize(original).map((text) => ({ text, selected: false }));
@@ -95,14 +125,29 @@
     editor.setAttribute("role", "dialog");
     editor.setAttribute("aria-label", "Create a fill-in-the-blank pattern");
 
+    const head = document.createElement("header");
+    head.className = "ysc-head";
     const heading = document.createElement("h2");
-    heading.textContent = "Select words, then choose an action";
+    heading.textContent = "Capture Structure";
+    const closeButton = document.createElement("button");
+    closeButton.type = "button";
+    closeButton.className = "ysc-close";
+    closeButton.title = "Close";
+    closeButton.setAttribute("aria-label", "Close");
+    closeButton.append(icon("close", 20));
+    closeButton.addEventListener("click", () => {
+      playVideo();
+      closeEditor();
+    });
+    head.append(icon("brand", 18), heading, closeButton);
     const sentence = document.createElement("p");
     sentence.className = "ysc-sentence";
     const preview = document.createElement("p");
     preview.className = "ysc-preview";
     const tools = document.createElement("div");
     tools.className = "ysc-tools";
+    const hint = document.createElement("p");
+    hint.className = "ysc-hint";
     const status = document.createElement("p");
     status.className = "ysc-status";
     status.setAttribute("aria-live", "polite");
@@ -137,9 +182,10 @@
         span.textContent = token.text;
         sentence.append(span);
       });
-      const hasBlank = kept().some((token) => token.selected);
-      preview.textContent = hasBlank ? currentPattern() : "";
-      preview.hidden = !hasBlank;
+      const hidden = kept().filter((token) => token.selected).length;
+      preview.textContent = hidden ? currentPattern() : "";
+      preview.hidden = !hidden;
+      hint.textContent = hidden ? `${hidden} ${hidden === 1 ? "word" : "words"} hidden` : "Select words, then press Hide";
       syncTools();
     }
 
@@ -198,7 +244,7 @@
     const save = document.createElement("button");
     save.type = "button";
     save.className = "ysc-primary";
-    save.textContent = "Save structure";
+    save.textContent = "Save Structure";
     save.addEventListener("click", async () => {
       if (!tokens.some((token) => token.selected && !token.removed)) {
         status.textContent = "Select a word and press Hide first.";
@@ -216,7 +262,7 @@
       }
     });
     actions.append(cancel, save);
-    editor.append(heading, sentence, tools, preview, status, actions);
+    editor.append(head, tools, sentence, preview, hint, status, actions);
     document.body.append(editor);
     document.addEventListener("pointerdown", onOutsidePointerDown, true);
   }

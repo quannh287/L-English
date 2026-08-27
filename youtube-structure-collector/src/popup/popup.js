@@ -6,10 +6,7 @@
   const titleLink = document.querySelector("#video-title");
   const searchInput = document.querySelector("#search");
   const structuresElement = document.querySelector("#structures");
-  const practiceButton = document.querySelector("#practice");
-  const showLibraryButton = document.querySelector("#show-library");
   const library = document.querySelector("#library");
-  const showCurrentButton = document.querySelector("#show-current");
   const librarySearchInput = document.querySelector("#library-search");
   const libraryGroups = document.querySelector("#library-groups");
   const quiz = document.querySelector("#quiz");
@@ -19,8 +16,9 @@
   const quizFeedback = document.querySelector("#quiz-feedback");
   const quizCheckButton = document.querySelector("#quiz-check");
   const quizNextButton = document.querySelector("#quiz-next");
+  const quizSkipButton = document.querySelector("#quiz-skip");
+  const quizProgressBar = document.querySelector("#quiz-progress span");
   const wordsSection = document.querySelector("#words");
-  const showWordsButton = document.querySelector("#show-words");
   const wordForm = document.querySelector("#word-form");
   const wordInput = document.querySelector("#word-input");
   const meaningInput = document.querySelector("#meaning-input");
@@ -34,6 +32,47 @@
   let quizScore = 0;
   let quizAnswered = false;
   let quizReviewingAll = false;
+
+  const SVG_NS = "http://www.w3.org/2000/svg";
+
+  function icon(name, size = 16) {
+    const svg = document.createElementNS(SVG_NS, "svg");
+    svg.setAttribute("width", size);
+    svg.setAttribute("height", size);
+    svg.setAttribute("viewBox", "0 0 24 24");
+    svg.setAttribute("fill", "none");
+    svg.setAttribute("stroke", "currentColor");
+    svg.setAttribute("stroke-width", "1.75");
+    svg.setAttribute("stroke-linecap", "round");
+    const use = document.createElementNS(SVG_NS, "use");
+    use.setAttribute("href", `#i-${name}`);
+    svg.append(use);
+    return svg;
+  }
+
+  function deleteButton(label, handler) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "icon-button";
+    button.append(icon("trash", 18));
+    button.setAttribute("aria-label", label);
+    button.addEventListener("click", handler);
+    return button;
+  }
+
+  const tabButtons = Array.from(document.querySelectorAll(".tab"));
+  const views = { collection, library, quiz, words: wordsSection };
+
+  function showView(name) {
+    status.hidden = true;
+    Object.entries(views).forEach(([key, section]) => { section.hidden = key !== name; });
+    tabButtons.forEach((tab) => tab.setAttribute("aria-selected", String(tab.dataset.view === name)));
+    if (name === "library") renderLibrary();
+    if (name === "words") { renderWords(); wordInput.focus(); }
+    if (name === "quiz") startQuiz();
+  }
+
+  tabButtons.forEach((tab) => tab.addEventListener("click", () => showView(tab.dataset.view)));
 
   async function persist() {
     const { videos = {} } = await chrome.storage.local.get("videos");
@@ -61,15 +100,15 @@
     link.target = "_blank";
     link.rel = "noreferrer";
     link.href = YSC.timestampUrl(url || video.url, item.startSeconds);
-    link.textContent = YSC.formatTimestamp(item.startSeconds);
+    link.append(icon("clock", 15), YSC.formatTimestamp(item.startSeconds));
     return link;
   }
 
   function render() {
-    titleLink.textContent = video.title;
+    titleLink.querySelector("span").textContent = video.title;
     titleLink.href = video.url;
     structuresElement.replaceChildren();
-    practiceButton.disabled = !video.structures.length;
+    tabButtons.find((tab) => tab.dataset.view === "quiz").disabled = !video.structures.length;
 
     if (!video.structures.length) {
       const empty = document.createElement("p");
@@ -90,15 +129,20 @@
 
     visible.forEach((item) => {
       const card = document.createElement("article");
-      card.className = "structure";
+      card.className = "card";
+      const head = document.createElement("header");
+      head.className = "card-head";
+      const meta = document.createElement("div");
+      meta.className = "meta";
+      if (YSC.isDue(item)) meta.append(dueBadge());
+      const stamp = timestampLink(item);
+      if (stamp) meta.append(stamp);
+      head.append(meta);
       const original = document.createElement("p");
       original.className = "original";
-      if (YSC.isDue(item)) original.append(dueBadge());
-      const stamp = timestampLink(item);
-      if (stamp) original.append(stamp, " ");
       original.append(item.original);
       const row = document.createElement("div");
-      row.className = "pattern-row";
+      row.className = "pattern-block";
       const input = document.createElement("input");
       input.value = item.pattern;
       input.setAttribute("aria-label", `Pattern for ${item.original}`);
@@ -111,28 +155,23 @@
         item.pattern = value;
         await persist();
       });
-      const remove = document.createElement("button");
-      remove.type = "button";
-      remove.textContent = "Delete";
-      remove.addEventListener("click", async () => {
+      const remove = deleteButton(`Delete structure: ${item.original}`, async () => {
         video.structures = video.structures.filter((structure) => structure.id !== item.id);
         await persist();
         render();
       });
-      row.append(input, remove);
+      row.append(input);
+      head.append(remove);
       const examples = document.createElement("ul");
       examples.className = "examples";
       const renderExamples = () => {
         examples.replaceChildren();
         YSC.examplesOf(item).forEach((example, exampleIndex) => {
           const li = document.createElement("li");
-          li.append(example);
-          const remove = document.createElement("button");
-          remove.type = "button";
-          remove.className = "example-remove";
-          remove.textContent = "×";
-          remove.setAttribute("aria-label", `Delete example: ${example}`);
-          remove.addEventListener("click", async () => {
+          const text = document.createElement("span");
+          text.textContent = example;
+          li.append(text);
+          const remove = deleteButton(`Delete example: ${example}`, async () => {
             item.examples = YSC.examplesOf(item).filter((_, i) => i !== exampleIndex);
             delete item.note;
             await persist();
@@ -158,7 +197,10 @@
         await persist();
         renderExamples();
       });
-      card.append(original, row, examples, note);
+      const examplesLabel = document.createElement("h4");
+      examplesLabel.className = "label";
+      examplesLabel.textContent = "Usage examples";
+      card.append(head, original, row, examplesLabel, examples, note);
       structuresElement.append(card);
     });
   }
@@ -181,31 +223,49 @@
     groups.forEach(({ entry, items }) => {
       const group = document.createElement("section");
       group.className = "library-group";
+      const head = document.createElement("header");
+      head.className = "library-group-head";
       const title = document.createElement("a");
       title.className = "library-group-title";
       title.target = "_blank";
       title.rel = "noreferrer";
       title.href = entry.url;
-      title.textContent = entry.title;
-      group.append(title);
+      title.append(icon("video", 18), entry.title);
+      const count = document.createElement("span");
+      count.className = "count-pill";
+      count.textContent = `${items.length} ${items.length === 1 ? "item" : "items"}`;
+      head.append(title, count);
+      group.append(head);
 
       items.forEach((item) => {
+        const wrap = document.createElement("article");
+        wrap.className = "card library-item";
+        const meta = document.createElement("header");
+        meta.className = "card-head";
+        const metaInner = document.createElement("div");
+        metaInner.className = "meta";
+        if (YSC.isDue(item)) metaInner.append(dueBadge());
+        const stamp = timestampLink(item, entry.url);
+        if (stamp) metaInner.append(stamp);
+        meta.append(metaInner);
+        if (metaInner.childNodes.length) wrap.append(meta);
         const original = document.createElement("p");
         original.className = "original";
-        if (YSC.isDue(item)) original.append(dueBadge());
-        const stamp = timestampLink(item, entry.url);
-        if (stamp) original.append(stamp, " ");
         original.append(item.original);
+        const patternBlock = document.createElement("div");
+        patternBlock.className = "pattern-block";
         const pattern = document.createElement("p");
         pattern.className = "pattern";
         pattern.textContent = item.pattern;
-        group.append(original, pattern);
+        patternBlock.append(pattern);
+        wrap.append(original, patternBlock);
         YSC.examplesOf(item).forEach((example) => {
           const note = document.createElement("p");
           note.className = "note-text";
           note.textContent = `— ${example}`;
-          group.append(note);
+          wrap.append(note);
         });
+        group.append(wrap);
       });
       libraryGroups.append(group);
     });
@@ -215,8 +275,12 @@
     await chrome.storage.local.set({ words });
   }
 
+  const wordCount = document.querySelector("#word-count");
+
   function renderWords() {
     wordList.replaceChildren();
+    wordCount.hidden = !words.length;
+    wordCount.textContent = `${words.length} ${words.length === 1 ? "item" : "items"}`;
     if (!words.length) {
       const empty = document.createElement("p");
       empty.className = "empty";
@@ -225,25 +289,47 @@
       return;
     }
     words.forEach((item) => {
-      const row = document.createElement("div");
+      const row = document.createElement("article");
       row.className = "word-item";
+      const head = document.createElement("header");
+      head.className = "word-head";
       const word = document.createElement("span");
       word.className = "word";
       word.textContent = item.word;
-      const meaning = document.createElement("span");
-      meaning.className = "meaning";
-      meaning.textContent = item.meaning || "";
-      const remove = document.createElement("button");
-      remove.type = "button";
-      remove.className = "word-remove";
-      remove.textContent = "\u00d7";
-      remove.setAttribute("aria-label", `Delete word: ${item.word}`);
-      remove.addEventListener("click", async () => {
+      const remove = deleteButton(`Delete word: ${item.word}`, async () => {
         words = words.filter((entry) => entry.id !== item.id);
         await persistWords();
         renderWords();
       });
-      row.append(word, meaning, remove);
+      const ipa = document.createElement("span");
+      ipa.className = "ipa";
+      ipa.textContent = item.ipa || "";
+      head.append(word, ipa, remove);
+      const meaning = document.createElement("p");
+      meaning.className = "meaning";
+      meaning.textContent = item.meaning || "";
+      row.append(head, meaning);
+      if (!item.meaning || !item.ipa) {
+        const lookup = document.createElement("button");
+        lookup.type = "button";
+        lookup.className = "lookup";
+        lookup.textContent = "Look up";
+        lookup.addEventListener("click", async () => {
+          lookup.disabled = true;
+          lookup.textContent = "Looking up…";
+          const found = await YSC.lookupWord(item.word);
+          if (!found) {
+            lookup.disabled = false;
+            lookup.textContent = "Not found — retry";
+            return;
+          }
+          item.meaning = item.meaning || found.meaning;
+          item.ipa = item.ipa || found.ipa;
+          await persistWords();
+          renderWords();
+        });
+        row.append(lookup);
+      }
       wordList.append(row);
     });
   }
@@ -252,10 +338,20 @@
     event.preventDefault();
     const word = wordInput.value.trim();
     if (!word) return;
-    const meaning = meaningInput.value.trim();
+    let meaning = meaningInput.value.trim();
+    let ipa = "";
+    if (!meaning) {
+      const found = await YSC.lookupWord(word);
+      meaning = found?.meaning || "";
+      ipa = found?.ipa || "";
+    }
     const existing = words.find((entry) => entry.word.toLowerCase() === word.toLowerCase());
-    if (existing) existing.meaning = meaning;
-    else words.push({ id: crypto.randomUUID(), word, meaning, createdAt: new Date().toISOString() });
+    if (existing) {
+      existing.meaning = meaning || existing.meaning;
+      existing.ipa = ipa || existing.ipa;
+    } else {
+      words.push({ id: crypto.randomUUID(), word, meaning, ipa, createdAt: new Date().toISOString() });
+    }
     wordInput.value = "";
     meaningInput.value = "";
     await persistWords();
@@ -263,20 +359,11 @@
     wordInput.focus();
   });
 
-  showWordsButton.addEventListener("click", () => {
-    collection.hidden = true;
-    wordsSection.hidden = false;
-    renderWords();
-    wordInput.focus();
-  });
-  document.querySelector("#words-back").addEventListener("click", () => {
-    wordsSection.hidden = true;
-    collection.hidden = false;
-  });
   document.querySelector("#words-copy").addEventListener("click", async (event) => {
     await navigator.clipboard.writeText(YSC.formatWordsMarkdown(words));
-    event.currentTarget.textContent = "Copied";
-    setTimeout(() => { event.currentTarget.textContent = "Copy Markdown"; }, 900);
+    const label = event.currentTarget.lastChild;
+    label.textContent = "Copied";
+    setTimeout(() => { label.textContent = "Copy MD"; }, 900);
   });
   document.querySelector("#words-download-md").addEventListener("click", () => {
     download(YSC.formatWordsMarkdown(words), "md", "vocabulary");
@@ -293,23 +380,31 @@
 
   function renderQuizQuestion() {
     if (quizIndex >= quizItems.length) {
-      quizScoreElement.textContent = `Done: ${quizScore}/${quizItems.length}`;
+      quizScoreElement.textContent = `Done — ${quizScore}/${quizItems.length} correct`;
       quizPatternElement.textContent = "";
+      quizPatternElement.hidden = true;
+      quizProgressBar.style.width = "100%";
       quizAnswerInput.hidden = true;
       quizFeedback.textContent = "";
+      quizFeedback.className = "";
+      quizSkipButton.hidden = true;
       quizCheckButton.hidden = true;
       quizNextButton.hidden = false;
       quizNextButton.textContent = "Restart";
       return;
     }
     const label = quizReviewingAll ? "Review" : "Due";
-    quizScoreElement.textContent = `${label} ${quizIndex + 1}/${quizItems.length} — Score: ${quizScore}`;
+    quizScoreElement.textContent = `${label} — item ${quizIndex + 1} of ${quizItems.length}`;
+    quizProgressBar.style.width = `${(quizIndex / quizItems.length) * 100}%`;
+    quizPatternElement.hidden = false;
     quizPatternElement.textContent = quizItems[quizIndex].pattern;
     quizAnswerInput.hidden = false;
     quizAnswerInput.value = "";
     quizAnswerInput.disabled = false;
     quizFeedback.textContent = "";
+    quizFeedback.className = "";
     quizAnswered = false;
+    quizSkipButton.hidden = false;
     quizCheckButton.hidden = false;
     quizNextButton.hidden = true;
     quizNextButton.textContent = "Next";
@@ -328,8 +423,10 @@
     const correct = YSC.checkAnswer(quizAnswerInput.value, answer);
     if (correct) quizScore += 1;
     quizFeedback.textContent = correct ? "Correct!" : `Not quite. Answer: ${answer}`;
+    quizFeedback.className = correct ? "is-correct" : "is-wrong";
     quizAnswered = true;
     quizAnswerInput.disabled = true;
+    quizSkipButton.hidden = true;
     quizCheckButton.hidden = true;
     quizNextButton.hidden = false;
 
@@ -344,13 +441,14 @@
     quizItems = shuffled(quizReviewingAll ? video.structures : due);
     quizIndex = 0;
     quizScore = 0;
-    collection.hidden = true;
-    quiz.hidden = false;
     renderQuizQuestion();
   }
 
-  practiceButton.addEventListener("click", startQuiz);
   quizCheckButton.addEventListener("click", checkQuizAnswer);
+  quizSkipButton.addEventListener("click", () => {
+    quizIndex += 1;
+    renderQuizQuestion();
+  });
   quizNextButton.addEventListener("click", () => {
     if (quizIndex >= quizItems.length) {
       startQuiz();
@@ -364,23 +462,10 @@
     if (quizAnswered) quizNextButton.click();
     else quizCheckButton.click();
   });
-  document.querySelector("#quiz-exit").addEventListener("click", () => {
-    quiz.hidden = true;
-    collection.hidden = false;
-  });
 
   searchInput.addEventListener("input", render);
   librarySearchInput.addEventListener("input", renderLibrary);
 
-  showLibraryButton.addEventListener("click", () => {
-    collection.hidden = true;
-    library.hidden = false;
-    renderLibrary();
-  });
-  showCurrentButton.addEventListener("click", () => {
-    library.hidden = true;
-    collection.hidden = false;
-  });
 
   function download(contents, extension, filename) {
     const blob = new Blob([contents], { type: "text/plain;charset=utf-8" });
@@ -393,8 +478,9 @@
 
   document.querySelector("#copy").addEventListener("click", async (event) => {
     await navigator.clipboard.writeText(YSC.formatMarkdown(video));
-    event.currentTarget.textContent = "Copied";
-    setTimeout(() => { event.currentTarget.textContent = "Copy Markdown"; }, 900);
+    const label = event.currentTarget.lastChild;
+    label.textContent = "Copied";
+    setTimeout(() => { label.textContent = "Copy MD"; }, 900);
   });
   document.querySelector("#download-md").addEventListener("click", () => {
     download(YSC.formatMarkdown(video), "md", YSC.sanitizeFilename(video.title));
@@ -405,8 +491,9 @@
 
   document.querySelector("#library-copy").addEventListener("click", async (event) => {
     await navigator.clipboard.writeText(YSC.formatLibraryMarkdown(allVideos));
-    event.currentTarget.textContent = "Copied";
-    setTimeout(() => { event.currentTarget.textContent = "Copy Markdown"; }, 900);
+    const label = event.currentTarget.lastChild;
+    label.textContent = "Copied";
+    setTimeout(() => { label.textContent = "Copy MD"; }, 900);
   });
   document.querySelector("#library-download-md").addEventListener("click", () => {
     download(YSC.formatLibraryMarkdown(allVideos), "md", "youtube-structures-library");
@@ -460,15 +547,15 @@
       const last = mostRecentlyUpdatedVideo(videos);
       if (!last) {
         status.textContent = "Open a YouTube video to add structures. Nothing saved yet.";
+        tabButtons.forEach((tab) => { tab.disabled = tab.dataset.view === "collection" || tab.dataset.view === "quiz"; });
         return;
       }
       videoId = last.videoId;
       video = last;
     }
 
-    status.hidden = true;
-    collection.hidden = false;
     render();
+    showView("collection");
   }
 
   initialize().catch((error) => {

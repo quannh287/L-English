@@ -7,64 +7,116 @@
     <link rel="stylesheet" href="popup.css">
   </head>
   <body>
+    <svg hidden aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <g id="i-brand"><rect x="3" y="3" width="6" height="6" rx="1"/><rect x="15" y="15" width="6" height="6" rx="1"/><path d="M9 6h4a2 2 0 0 1 2 2v10"/></g>
+        <g id="i-video"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M10.5 9.5l4.5 2.5-4.5 2.5z"/></g>
+        <g id="i-library"><rect x="8" y="3" width="13" height="13" rx="2"/><path d="M5 7v12a1 1 0 0 0 1 1h12"/></g>
+        <g id="i-practice"><rect x="4.5" y="7.5" width="3.5" height="9" rx="1"/><rect x="16" y="7.5" width="3.5" height="9" rx="1"/><path d="M8 12h8M2.5 10v4M21.5 10v4"/></g>
+        <g id="i-words"><path d="M3 6h9M8 6c0 4-2 7-5 8.5M5 10c1.5 2.5 3.5 4 6 5"/><path d="M13 20l4-9 4 9M14.6 16.5h4.8"/></g>
+        <g id="i-clock"><circle cx="12" cy="12" r="8"/><path d="M12 8v4.5l3 1.8"/></g>
+        <g id="i-trash"><path d="M4 7h16M9.5 7V4.5h5V7M6.5 7l1 12.5h9L17.5 7"/></g>
+        <g id="i-search"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></g>
+        <g id="i-plus"><circle cx="12" cy="12" r="8.5"/><path d="M12 8v8M8 12h8"/></g>
+        <g id="i-copy"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M15 5.5H6a1.5 1.5 0 0 0-1.5 1.5v9"/></g>
+        <g id="i-download"><path d="M12 4v11M7.5 10.5l4.5 4.5 4.5-4.5M4.5 20h15"/></g>
+        <g id="i-doc"><path d="M6.5 3h7l4.5 4.5V21h-11.5z"/><path d="M13 3v5h5"/></g>
+        <g id="i-clear"><path d="M4 7h11M9 7V4.5h5V7M6 7l1 12.5h7.5M18 14l4 4M22 14l-4 4"/></g>
+        <g id="i-save"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8.5 4v5.5h7V4M8.5 20v-5h7v5"/></g>
+        <g id="i-external"><path d="M14 4.5h5.5V10M19.5 4.5L12 12M18 14v5.5h-14v-14H10"/></g>
+      </defs>
+    </svg>
+    <header class="app-bar">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"><use href="#i-brand"/></svg>
+      <h1>Structure Collector</h1>
+    </header>
     <main>
-      <h1>YouTube Structure Collector</h1>
-      <p id="status" role="status">Loading…</p>
+      <p id="status" class="status-block" role="status">Loading…</p>
       <section id="collection" hidden>
-        <a id="video-title" target="_blank" rel="noreferrer"></a>
-        <div class="view-actions">
-          <button id="practice" type="button">Practice</button>
-          <button id="show-library" type="button">All videos</button>
-          <button id="show-words" type="button">New words</button>
+        <a id="video-title" target="_blank" rel="noreferrer">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"><use href="#i-external"/></svg>
+          <span></span>
+        </a>
+        <div class="field">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"><use href="#i-search"/></svg>
+          <input id="search" type="search" placeholder="Search structures…" aria-label="Search structures for this video">
         </div>
-        <input id="search" type="search" placeholder="Search structures" aria-label="Search structures for this video">
         <div id="structures"></div>
-        <div class="export-actions">
-          <button id="copy" type="button">Copy Markdown</button>
-          <button id="download-md" type="button">Download MD</button>
-          <button id="download-txt" type="button">Download TXT</button>
+        <div class="footer-actions">
+          <div class="export-actions">
+            <button id="copy" type="button"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"><use href="#i-copy"/></svg>Copy MD</button>
+            <button id="download-md" type="button"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"><use href="#i-download"/></svg>DL MD</button>
+            <button id="download-txt" type="button"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"><use href="#i-doc"/></svg>DL TXT</button>
+          </div>
+          <button id="clear" class="danger" type="button"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"><use href="#i-clear"/></svg>Clear this video</button>
         </div>
-        <button id="clear" class="danger" type="button">Clear this video</button>
       </section>
       <section id="library" hidden>
-        <div class="view-actions">
-          <button id="show-current" type="button">Back to this video</button>
+        <div class="field">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"><use href="#i-search"/></svg>
+          <input id="library-search" type="search" placeholder="Search structures…" aria-label="Search all structures">
         </div>
-        <input id="library-search" type="search" placeholder="Search all structures" aria-label="Search all structures">
-        <div id="library-groups"></div>
         <div class="export-actions">
-          <button id="library-copy" type="button">Copy Markdown</button>
-          <button id="library-download-md" type="button">Download MD</button>
-          <button id="library-download-txt" type="button">Download TXT</button>
+          <button id="library-copy" type="button"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"><use href="#i-copy"/></svg>Copy MD</button>
+          <button id="library-download-md" type="button"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"><use href="#i-download"/></svg>DL MD</button>
+          <button id="library-download-txt" type="button"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"><use href="#i-doc"/></svg>DL TXT</button>
         </div>
+        <div id="library-groups"></div>
       </section>
       <section id="words" hidden>
-        <div class="view-actions">
-          <button id="words-back" type="button">Back to this video</button>
-        </div>
-        <form id="word-form">
-          <input id="word-input" placeholder="New word" aria-label="New word" required>
+        <form id="word-form" class="card">
+          <div class="card-head">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" style="color: var(--primary)"><use href="#i-plus"/></svg>
+            <h2 style="font: 700 16px/24px var(--sans); letter-spacing: -0.01em; margin: 0">Add Entry</h2>
+          </div>
+          <input id="word-input" placeholder="Word or phrase" aria-label="New word" required>
           <input id="meaning-input" placeholder="Meaning / note" aria-label="Meaning or note">
-          <button type="submit">Add</button>
+          <button class="primary" type="submit"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"><use href="#i-save"/></svg>Add Word</button>
         </form>
+        <div class="list-head">
+          <h3 class="label">Collected terminology</h3>
+          <span id="word-count" class="count-pill" hidden></span>
+        </div>
         <div id="word-list"></div>
-        <div class="export-actions">
-          <button id="words-copy" type="button">Copy Markdown</button>
-          <button id="words-download-md" type="button">Download MD</button>
+        <div class="footer-actions">
+          <div class="export-actions">
+            <button id="words-copy" type="button"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"><use href="#i-copy"/></svg>Copy MD</button>
+            <button id="words-download-md" type="button"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"><use href="#i-download"/></svg>DL MD</button>
+          </div>
         </div>
       </section>
       <section id="quiz" hidden>
-        <p id="quiz-score"></p>
+        <div id="quiz-head">
+          <div>
+            <h2>Daily Practice</h2>
+            <p id="quiz-score"></p>
+          </div>
+          <div id="quiz-progress"><span style="width: 0%"></span></div>
+        </div>
         <p id="quiz-pattern"></p>
         <input id="quiz-answer" type="text" autocomplete="off" placeholder="Missing word(s)" aria-label="Type the missing word or words">
         <p id="quiz-feedback" role="status" aria-live="polite"></p>
         <div class="quiz-actions">
-          <button id="quiz-check" type="button">Check</button>
-          <button id="quiz-next" type="button" hidden>Next</button>
+          <button id="quiz-skip" type="button">Skip</button>
+          <button id="quiz-check" class="primary" type="button">Check</button>
+          <button id="quiz-next" class="primary" type="button" hidden>Next</button>
         </div>
-        <button id="quiz-exit" type="button">Back to list</button>
       </section>
     </main>
+    <nav class="tabs" role="tablist" aria-label="Views">
+      <button class="tab" type="button" role="tab" data-view="collection" aria-selected="true">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"><use href="#i-video"/></svg>This Video
+      </button>
+      <button class="tab" type="button" role="tab" data-view="library" aria-selected="false">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"><use href="#i-library"/></svg>All Videos
+      </button>
+      <button class="tab" type="button" role="tab" data-view="quiz" aria-selected="false" disabled>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"><use href="#i-practice"/></svg>Practice
+      </button>
+      <button class="tab" type="button" role="tab" data-view="words" aria-selected="false">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"><use href="#i-words"/></svg>New Words
+      </button>
+    </nav>
     <script src="../lib/structure-utils.js"></script>
     <script src="popup.js"></script>
   </body>
