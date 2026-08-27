@@ -23,6 +23,7 @@
   const wordInput = document.querySelector("#word-input");
   const meaningInput = document.querySelector("#meaning-input");
   const wordList = document.querySelector("#word-list");
+  const addEntry = document.querySelector("#add-entry");
   let words = [];
   let videoId;
   let video;
@@ -50,6 +51,34 @@
     return svg;
   }
 
+  // ponytail: dblclick + contenteditable instead of swapping in real inputs
+  function makeEditable(element, save) {
+    element.title = "Double-click to edit";
+    element.addEventListener("dblclick", () => {
+      element.dataset.value = element.textContent;
+      element.contentEditable = "plaintext-only";
+      element.classList.add("is-editing");
+      element.focus();
+      getSelection().selectAllChildren(element);
+    });
+    element.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        element.blur();
+      }
+      if (event.key === "Escape") {
+        element.textContent = element.dataset.value;
+        element.blur();
+      }
+    });
+    element.addEventListener("blur", async () => {
+      element.contentEditable = "false";
+      element.classList.remove("is-editing");
+      getSelection().removeAllRanges();
+      element.textContent = await save(element.textContent.trim(), element.dataset.value);
+    });
+  }
+
   function deleteButton(label, handler) {
     const button = document.createElement("button");
     button.type = "button";
@@ -68,7 +97,7 @@
     Object.entries(views).forEach(([key, section]) => { section.hidden = key !== name; });
     tabButtons.forEach((tab) => tab.setAttribute("aria-selected", String(tab.dataset.view === name)));
     if (name === "library") renderLibrary();
-    if (name === "words") { renderWords(); wordInput.focus(); }
+    if (name === "words") { renderWords(); if (addEntry.open) wordInput.focus(); }
     if (name === "quiz") startQuiz();
   }
 
@@ -305,9 +334,21 @@
       ipa.className = "ipa";
       ipa.textContent = item.ipa || "";
       head.append(word, ipa, remove);
+      makeEditable(word, async (value, previous) => {
+        const taken = words.some((entry) => entry.id !== item.id && entry.word.toLowerCase() === value.toLowerCase());
+        if (!value || taken) return previous;
+        item.word = value;
+        await persistWords();
+        return value;
+      });
       const meaning = document.createElement("p");
       meaning.className = "meaning";
       meaning.textContent = item.meaning || "";
+      makeEditable(meaning, async (value) => {
+        item.meaning = value;
+        await persistWords();
+        return value;
+      });
       row.append(head, meaning);
       if (!item.meaning || !item.ipa) {
         const lookup = document.createElement("button");
@@ -333,6 +374,8 @@
       wordList.append(row);
     });
   }
+
+  addEntry.addEventListener("toggle", () => { if (addEntry.open) wordInput.focus(); });
 
   wordForm.addEventListener("submit", async (event) => {
     event.preventDefault();
