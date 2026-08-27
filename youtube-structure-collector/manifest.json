@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "YouTube Structure Collector",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "Turn YouTube transcript sentences into reusable fill-in-the-blank patterns.",
   "permissions": [
     "storage",
