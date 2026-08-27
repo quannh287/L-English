@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.2](https://github.com/quannh287/L-English/compare/v0.3.1...v0.3.2) (2026-08-27)
+
+
+### Bug Fixes
+
+* **ci:** use code owners for release reviews ([67db496](https://github.com/quannh287/L-English/commit/67db496cdf5172b564763fc169ca3a245ee7c931))
+
 ## [0.3.1](https://github.com/quannh287/L-English/compare/v0.3.0...v0.3.1) (2026-08-27)
 
 
