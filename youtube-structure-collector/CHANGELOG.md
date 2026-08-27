@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.4.0](https://github.com/quannh287/L-English/compare/v0.3.2...v0.4.0) (2026-08-27)
+
+
+### Features
+
+* add popup practice/quiz mode for saved structures ([b37a98e](https://github.com/quannh287/L-English/commit/b37a98eb94269828d1267df3f1b48aa7af8b81fd))
+
+
+### Bug Fixes
+
+* **content-script:** show clear error when extension context is invalidated ([e0ec725](https://github.com/quannh287/L-English/commit/e0ec7251123a5f5306942dbe69d519a4c16bbb31))
+
 ## [0.3.2](https://github.com/quannh287/L-English/compare/v0.3.1...v0.3.2) (2026-08-27)
 
 
