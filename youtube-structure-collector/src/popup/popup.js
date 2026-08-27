@@ -26,6 +26,7 @@
   let quizIndex = 0;
   let quizScore = 0;
   let quizAnswered = false;
+  let quizReviewingAll = false;
 
   async function persist() {
     const { videos = {} } = await chrome.storage.local.get("videos");
@@ -164,7 +165,8 @@
       quizNextButton.textContent = "Restart";
       return;
     }
-    quizScoreElement.textContent = `Question ${quizIndex + 1}/${quizItems.length} — Score: ${quizScore}`;
+    const label = quizReviewingAll ? "Review" : "Due";
+    quizScoreElement.textContent = `${label} ${quizIndex + 1}/${quizItems.length} — Score: ${quizScore}`;
     quizPatternElement.textContent = quizItems[quizIndex].pattern;
     quizAnswerInput.hidden = false;
     quizAnswerInput.value = "";
@@ -200,7 +202,9 @@
   }
 
   function startQuiz() {
-    quizItems = shuffled(video.structures);
+    const due = video.structures.filter((item) => YSC.isDue(item));
+    quizReviewingAll = !due.length;
+    quizItems = shuffled(quizReviewingAll ? video.structures : due);
     quizIndex = 0;
     quizScore = 0;
     collection.hidden = true;
