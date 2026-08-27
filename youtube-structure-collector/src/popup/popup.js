@@ -283,22 +283,47 @@
     render();
   });
 
+  function mostRecentlyUpdatedVideo(videos) {
+    let latest = null;
+    let latestTime = -Infinity;
+    Object.values(videos).forEach((entry) => {
+      entry.structures.forEach((item) => {
+        const time = Date.parse(item.createdAt) || 0;
+        if (time > latestTime) {
+          latestTime = time;
+          latest = entry;
+        }
+      });
+    });
+    return latest;
+  }
+
   async function initialize() {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-    videoId = YSC.getVideoId(tab?.url);
-    if (!videoId || !tab.url?.startsWith("https://www.youtube.com/watch")) {
-      status.textContent = "Open a YouTube video to view its structures.";
-      return;
-    }
+    const onWatchPage = Boolean(tab?.url?.startsWith("https://www.youtube.com/watch"));
+    const tabVideoId = onWatchPage ? YSC.getVideoId(tab.url) : null;
 
     const { videos = {} } = await chrome.storage.local.get("videos");
     allVideos = videos;
-    video = videos[videoId] || {
-      videoId,
-      title: tab.title?.replace(/\s*-\s*YouTube$/, "") || "YouTube video",
-      url: tab.url,
-      structures: []
-    };
+
+    if (tabVideoId) {
+      videoId = tabVideoId;
+      video = videos[tabVideoId] || {
+        videoId: tabVideoId,
+        title: tab.title?.replace(/\s*-\s*YouTube$/, "") || "YouTube video",
+        url: tab.url,
+        structures: []
+      };
+    } else {
+      const last = mostRecentlyUpdatedVideo(videos);
+      if (!last) {
+        status.textContent = "Open a YouTube video to add structures. Nothing saved yet.";
+        return;
+      }
+      videoId = last.videoId;
+      video = last;
+    }
+
     status.hidden = true;
     collection.hidden = false;
     render();
