@@ -77,6 +77,10 @@ The extension has no backend, analytics, or account system. Saved structures and
 
 One exception: pressing **Look up** on a saved word sends that single word to `api.dictionaryapi.dev` and, if it fails, `en.wiktionary.org`. Nothing else — no video, sentence, or identifier — ever leaves your machine, and no lookup happens unless you press the button.
 
+## License
+
+[MIT](LICENSE) — clone, fork, modify, and redistribute freely; just keep the copyright notice.
+
 ## Current limitations
 
 - Only subtitles currently displayed over the video and lines in YouTube's transcript panel are supported.
