@@ -37,7 +37,7 @@
 
   function matchesSearch(item, query) {
     if (!query) return true;
-    return `${item.original} ${item.pattern}`.toLowerCase().includes(query.toLowerCase());
+    return `${item.original} ${item.pattern} ${YSC.examplesOf(item).join(" ")}`.toLowerCase().includes(query.toLowerCase());
   }
 
   function dueBadge() {
@@ -45,6 +45,17 @@
     badge.className = "due-badge";
     badge.textContent = "Due";
     return badge;
+  }
+
+  function timestampLink(item, url) {
+    if (!Number.isFinite(item.startSeconds)) return null;
+    const link = document.createElement("a");
+    link.className = "timestamp";
+    link.target = "_blank";
+    link.rel = "noreferrer";
+    link.href = YSC.timestampUrl(url || video.url, item.startSeconds);
+    link.textContent = YSC.formatTimestamp(item.startSeconds);
+    return link;
   }
 
   function render() {
@@ -76,6 +87,8 @@
       const original = document.createElement("p");
       original.className = "original";
       if (YSC.isDue(item)) original.append(dueBadge());
+      const stamp = timestampLink(item);
+      if (stamp) original.append(stamp, " ");
       original.append(item.original);
       const row = document.createElement("div");
       row.className = "pattern-row";
@@ -100,7 +113,45 @@
         render();
       });
       row.append(input, remove);
-      card.append(original, row);
+      const examples = document.createElement("ul");
+      examples.className = "examples";
+      const renderExamples = () => {
+        examples.replaceChildren();
+        YSC.examplesOf(item).forEach((example, exampleIndex) => {
+          const li = document.createElement("li");
+          li.append(example);
+          const remove = document.createElement("button");
+          remove.type = "button";
+          remove.className = "example-remove";
+          remove.textContent = "×";
+          remove.setAttribute("aria-label", `Delete example: ${example}`);
+          remove.addEventListener("click", async () => {
+            item.examples = YSC.examplesOf(item).filter((_, i) => i !== exampleIndex);
+            delete item.note;
+            await persist();
+            renderExamples();
+          });
+          li.append(remove);
+          examples.append(li);
+        });
+      };
+      renderExamples();
+
+      const note = document.createElement("input");
+      note.className = "note";
+      note.placeholder = "Dùng khi nào / ví dụ của bạn — Enter để thêm";
+      note.setAttribute("aria-label", `Add a usage example for ${item.original}`);
+      note.addEventListener("keydown", async (event) => {
+        if (event.key !== "Enter") return;
+        const value = note.value.trim();
+        if (!value) return;
+        item.examples = [...YSC.examplesOf(item), value];
+        delete item.note;
+        note.value = "";
+        await persist();
+        renderExamples();
+      });
+      card.append(original, row, examples, note);
       structuresElement.append(card);
     });
   }
@@ -135,11 +186,19 @@
         const original = document.createElement("p");
         original.className = "original";
         if (YSC.isDue(item)) original.append(dueBadge());
+        const stamp = timestampLink(item, entry.url);
+        if (stamp) original.append(stamp, " ");
         original.append(item.original);
         const pattern = document.createElement("p");
         pattern.className = "pattern";
         pattern.textContent = item.pattern;
         group.append(original, pattern);
+        YSC.examplesOf(item).forEach((example) => {
+          const note = document.createElement("p");
+          note.className = "note-text";
+          note.textContent = `— ${example}`;
+          group.append(note);
+        });
       });
       libraryGroups.append(group);
     });
