@@ -1,5 +1,24 @@
 # Changelog
 
+## [1.1.0](https://github.com/quannh287/L-English/compare/v1.0.0...v1.1.0) (2026-08-28)
+
+
+### Features
+
+* **content:** show full sentence, remove words, close editor on outside click ([78b2659](https://github.com/quannh287/L-English/commit/78b2659cbe967d122a349007199800fb6783d28d))
+* **icons:** regenerate app icon in indigo brand palette ([814cf97](https://github.com/quannh287/L-English/commit/814cf975850a76f36ca9bcfa894437d382815695))
+* **scripts:** install a released version, and swap the folder atomically ([83355ac](https://github.com/quannh287/L-English/commit/83355ac1ac8cda20a001f7bf12b78fa79d0c942b))
+* **ui:** redesign popup and editor to Stitch design system ([58955d7](https://github.com/quannh287/L-English/commit/58955d75ee5c57a08c58e731dc3bfb04822f75ac))
+* **words:** add vocabulary notebook and selection-based editor actions ([38b0ba1](https://github.com/quannh287/L-English/commit/38b0ba14f61fdaf4e92362b8e6e6b1db00da499b))
+* **words:** auto-fill English meaning and IPA from dictionary API ([c334104](https://github.com/quannh287/L-English/commit/c334104c9cc99394418c7abe505b38ebff6d40c9))
+* **words:** collapse Add Entry and edit words in place ([beb5828](https://github.com/quannh287/L-English/commit/beb582829d3a6a54db4a7e9f2be9aad8e63f245b))
+
+
+### Bug Fixes
+
+* **scripts:** install to ~/Documents instead of Application Support ([2e2ff7f](https://github.com/quannh287/L-English/commit/2e2ff7f944d0285f0b26d71efa536daa213fdc51))
+* **words:** fall back to Wiktionary when the dictionary API is down ([baac5f4](https://github.com/quannh287/L-English/commit/baac5f44825bfe9f92cc92152d121778d3cd540f))
+
 ## [1.0.0](https://github.com/quannh287/L-English/compare/v1.2.0...v1.0.0) (2026-08-28)
 
 
